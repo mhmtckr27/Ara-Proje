@@ -10,83 +10,90 @@ using UnityEngine;
 public partial class Rabbit : MonoBehaviour
 {
 	#region Variable Declarations
+	private const Diet diet = Diet.Plant;
 	private const float maxLifeTime = 120f; //1 year = 60 sec.
 	private const float maxFoodSaturation = 100f;
 	private const float maxWaterSaturation = 100f;
-	private const float maxReproductionUrge = 100f;
+	private const float maxReproductiveUrge = 100f;
 	private const float restLimit = 75f;//eğer tokluk ve suya doygunluk bu sınırın üstündeyse ve üreme dürtüsü de bunun altındaysa rest durumuna geçer.
 	private float lifeTime;
-	private float reproductionUrge;
+	private float reproductiveUrge;
 
 	[SerializeField] private float foodSaturation;//tokluk
 	[SerializeField] private float waterSaturation;//suya doygunluk
 	[SerializeField] private float maxViewingDistance;
+	[SerializeField] public float energy;
+	[SerializeField] private float energyConsumeSpeed;
+	[SerializeField] private LayerMask notGroundLayers;
+	[SerializeField] private Collider col;
+
 	#endregion
 
 	Vector3 moveTo;
 	Priority currentPriority;
 	Dictionary<string,GameObject> objectsDictionary = new Dictionary<string, GameObject>();
 
-
+	Vector3 firstPos;
+	Vector3 lastPos;
 	private void Start()
 	{
-		//InvokeRepeating("CalculateMovement", 0f, 1f);
+		firstPos = transform.position;
 	}
+
 	private void Update()
 	{
 		CreateDictionary();//Scan and create scanned objects' dictionary
 		DeterminePriority();
 		ChooseAction();
-		//Move();
+		ConsumeEnergy();
 	}
 
-	private void ChooseAction()
+	private void ConsumeEnergy()
 	{
-		switch (currentPriority)
-		{
-			case Priority.EscapeFox:
-				EscapeFox();
-				break;
-			case Priority.FindFood:
-				FindFood();
-				break;
-			case Priority.FindWater:
-				FindWater();
-				break;
-			case Priority.Reproduce:
-				FindMate();
-				break;
-			case Priority.Rest:
-				Rest();
-				break;
-		}
+		//TODO: bunu da bişeylere bağla işte bu kadar sade olmasın xd
+		lastPos = transform.position;
+		energy -= Vector3.Distance(lastPos, firstPos) * energyConsumeSpeed * Time.deltaTime;
+		firstPos = lastPos;
 	}
 
 	private void Rest()
 	{
+		//TODO: enerji kazancını tokluk ve susamışlığa bağla, "wellness" veya "wellbeingness" fieldı koy.
+		energy += Time.deltaTime * Time.deltaTime;
 	}
 
-	private void FindMate()
+	private void ChooseAction()
 	{
-		throw new NotImplementedException();
+		if(currentPriority == Priority.Rest)
+		{
+			Rest();
+			return;
+		}
+		GameObject priorityObj;
+		objectsDictionary.TryGetValue(currentPriority.ToString(), out priorityObj);
+		if(currentPriority == Priority.Fox)
+		{
+			EscapeFox(priorityObj);
+		}
+		else
+		{
+			TakeAction(priorityObj);
+		}
 	}
 
-	private void FindWater()
+
+	private void TakeAction(GameObject priorityObj)
 	{
-		throw new NotImplementedException();
+		Quaternion lookAt = Quaternion.LookRotation(priorityObj.transform.position - transform.position, transform.up);
+		transform.rotation = Quaternion.Slerp(transform.rotation, lookAt, 0.1f);
+		transform.position = Vector3.MoveTowards(transform.position, transform.position + transform.forward, 0.1f);
 	}
 
-	private void FindFood()
+	private void EscapeFox(GameObject closestFox)
 	{
-		throw new NotImplementedException();
-	}
-
-	private void EscapeFox()
-	{
-		GameObject closestFox;
-		objectsDictionary.TryGetValue("Fox", out closestFox);
-		transform.forward = transform.position - closestFox.transform.position;
-		//TODO: smooth out the movement.
+		//TODO: move to fox script
+		closestFox.transform.LookAt(gameObject.transform);
+		transform.rotation = Quaternion.Slerp(transform.rotation,closestFox.transform.rotation, 0.1f);
 		transform.position = Vector3.MoveTowards(transform.position, transform.position + transform.forward, 0.1f);
 	}
 	private bool ShouldReplace(Vector3 obj1, Vector3 obj2)
@@ -101,7 +108,7 @@ public partial class Rabbit : MonoBehaviour
 		//clear previous values;
 		objectsDictionary.Clear();
 		List<Collider> hits = Scan.ToList();
-		Debug.Log(hits.Remove(gameObject.GetComponent<Collider>()));
+		hits.Remove(col);
 		
 		foreach(Collider collider in hits)
 		{
@@ -132,11 +139,11 @@ public partial class Rabbit : MonoBehaviour
 	{
 		if (objectsDictionary.ContainsKey("Fox"))
 		{
-			currentPriority = Priority.EscapeFox;
+			currentPriority = Priority.Fox;
 			return;
 		}
 
-		float maxPriority = Mathf.Max(foodSaturation, waterSaturation, maxReproductionUrge - reproductionUrge);
+		float maxPriority = Mathf.Min(foodSaturation, waterSaturation, maxReproductiveUrge - reproductiveUrge);
 
 		if(maxPriority > restLimit)
 		{
@@ -144,20 +151,20 @@ public partial class Rabbit : MonoBehaviour
 		}
 		else if(maxPriority == foodSaturation)
 		{
-			currentPriority = Priority.FindFood;
+			currentPriority = Priority.Food;
 		}
 		else if(maxPriority == waterSaturation)
 		{
-			currentPriority = Priority.FindWater;
+			currentPriority = Priority.Water;
 		}
 		else
 		{
-			currentPriority = Priority.Reproduce;
+			currentPriority = Priority.Rabbit;
 		}
 	}
 
 	private void OnDrawGizmos() => Gizmos.DrawWireSphere(transform.position, maxViewingDistance);
-	private Collider[] Scan => Physics.OverlapSphere(transform.position, maxViewingDistance);
+	private Collider[] Scan => Physics.OverlapSphere(transform.position, maxViewingDistance, notGroundLayers);
 
 	private void CalculateMovement()
 	{

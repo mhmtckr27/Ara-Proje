@@ -6,10 +6,10 @@ public partial class Rabbit
 {
 	enum Priority
 	{
-		EscapeFox,
-		FindFood,
-		FindWater,
-		Reproduce,
+		Fox,
+		Food,
+		Water,
+		Rabbit,
 		Rest
 	}
 }
