@@ -7,7 +7,7 @@ public partial class Rabbit
 	enum Priority
 	{
 		Fox,
-		Food,
+		Plant,
 		Water,
 		Rabbit,
 		Rest

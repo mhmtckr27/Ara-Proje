@@ -9,25 +9,27 @@ using System.Collections.Generic;
 using UnityEngine;
 public partial class Rabbit : MonoBehaviour
 {
-	#region Variable Declarations
+	#region Constant Variable Declarations
 	private const Diet diet = Diet.Plant;
 	private const float maxLifeTime = 120f; //1 year = 60 sec.
 	private const float maxFoodSaturation = 100f;
 	private const float maxWaterSaturation = 100f;
 	private const float maxReproductiveUrge = 100f;
+	private const float maxViewingDistance = 20f;
+	private const float maxEnergy = 100f;
 	private const float restLimit = 75f;//eğer tokluk ve suya doygunluk bu sınırın üstündeyse ve üreme dürtüsü de bunun altındaysa rest durumuna geçer.
-	private float lifeTime;
-	private float reproductiveUrge;
+	#endregion
 
-	[SerializeField] private float foodSaturation;//tokluk
-	[SerializeField] private float waterSaturation;//suya doygunluk
-	[SerializeField] private float maxViewingDistance;
-	[SerializeField] public float energy;
+	[SerializeField] [Range(0, maxFoodSaturation)] private float foodSaturation;//tokluk
+	[SerializeField] [Range(0, maxWaterSaturation)] private float waterSaturation;//suya doygunluk
+	[SerializeField] [Range(0, maxReproductiveUrge)] private float reproductiveUrge;//suya doygunluk
+	[SerializeField] [Range(0, maxEnergy)] public float energy;
+	[SerializeField] [Range(0, maxViewingDistance)] private float viewingDistance;
+	[SerializeField] [Range(0, maxLifeTime)] private float remainingLifeTime;
 	[SerializeField] private float energyConsumeSpeed;
 	[SerializeField] private LayerMask notGroundLayers;
 	[SerializeField] private Collider col;
 
-	#endregion
 
 	Vector3 moveTo;
 	Priority currentPriority;
@@ -45,15 +47,27 @@ public partial class Rabbit : MonoBehaviour
 		CreateDictionary();//Scan and create scanned objects' dictionary
 		DeterminePriority();
 		ChooseAction();
-		ConsumeEnergy();
+		Consume();
 	}
 
-	private void ConsumeEnergy()
+	private void Consume()
 	{
 		//TODO: bunu da bişeylere bağla işte bu kadar sade olmasın xd
 		lastPos = transform.position;
 		energy -= Vector3.Distance(lastPos, firstPos) * energyConsumeSpeed * Time.deltaTime;
 		firstPos = lastPos;
+		remainingLifeTime -= Time.deltaTime;
+		if (remainingLifeTime <= 0)
+		{
+			Die(CauseOfDeath.OldAge);
+		}
+	}
+
+	private void Die(CauseOfDeath causeOfDeath)
+	{
+		Debug.Log(gameObject.name + " died of " + causeOfDeath);
+		//TODO: ölüm olayları ekle,animasyon vs, yan yatıp gözleri x_x(çarpı yap) bikaç saniye sonra yok olsun.
+		Destroy(gameObject);
 	}
 
 	private void Rest()
@@ -64,13 +78,17 @@ public partial class Rabbit : MonoBehaviour
 
 	private void ChooseAction()
 	{
+		//TODO: burası karışıyor vaziyet al!! bunu daha düzenli yapabilirsin bence?
 		if(currentPriority == Priority.Rest)
 		{
 			Rest();
 			return;
 		}
 		GameObject priorityObj;
-		objectsDictionary.TryGetValue(currentPriority.ToString(), out priorityObj);
+		if(!objectsDictionary.TryGetValue(currentPriority.ToString(), out priorityObj))
+		{
+			return;
+		}
 		if(currentPriority == Priority.Fox)
 		{
 			EscapeFox(priorityObj);
@@ -85,9 +103,32 @@ public partial class Rabbit : MonoBehaviour
 	private void TakeAction(GameObject priorityObj)
 	{
 		Quaternion lookAt = Quaternion.LookRotation(priorityObj.transform.position - transform.position, transform.up);
+		//TODO: buraları düzenle hardcodingi düzelt.
+		if (PriorityNear(priorityObj))
+		{
+			if (Consume(priorityObj))
+			{
+				foodSaturation += 20;
+				energy += 20;
+				waterSaturation -= 5;
+			}
+		}
 		transform.rotation = Quaternion.Slerp(transform.rotation, lookAt, 0.1f);
 		transform.position = Vector3.MoveTowards(transform.position, transform.position + transform.forward, 0.1f);
 	}
+
+	private bool Consume(GameObject priorityObj)
+	{
+		//TODO: null kontrolü gerekli mi karar ver, çok yük bindirebilir.
+		if (priorityObj != null)
+		{
+			Destroy(priorityObj);
+			return true;
+		}
+		return false;
+	}
+
+	private bool PriorityNear(GameObject priority) => Vector3.Distance(priority.transform.position, transform.position) <= 1f;
 
 	private void EscapeFox(GameObject closestFox)
 	{
@@ -102,9 +143,9 @@ public partial class Rabbit : MonoBehaviour
 		float distToObj2 = Vector3.Distance(transform.position, obj2);
 		return distToObj1 > distToObj2 ? true : false;
 	}
-
 	private void CreateDictionary()
 	{
+		//TODO: bu fonksiyon da fazla karmaşık düzeltebilirsen düzelt.
 		//clear previous values;
 		objectsDictionary.Clear();
 		List<Collider> hits = Scan.ToList();
@@ -137,6 +178,7 @@ public partial class Rabbit : MonoBehaviour
 	}
 	private void DeterminePriority()
 	{
+		//TODO: burası da cumbersome, belki düzenleyebilirsin.
 		if (objectsDictionary.ContainsKey("Fox"))
 		{
 			currentPriority = Priority.Fox;
@@ -151,7 +193,7 @@ public partial class Rabbit : MonoBehaviour
 		}
 		else if(maxPriority == foodSaturation)
 		{
-			currentPriority = Priority.Food;
+			currentPriority = Priority.Plant;
 		}
 		else if(maxPriority == waterSaturation)
 		{
@@ -163,9 +205,10 @@ public partial class Rabbit : MonoBehaviour
 		}
 	}
 
-	private void OnDrawGizmos() => Gizmos.DrawWireSphere(transform.position, maxViewingDistance);
-	private Collider[] Scan => Physics.OverlapSphere(transform.position, maxViewingDistance, notGroundLayers);
+	private void OnDrawGizmos() => Gizmos.DrawWireSphere(transform.position, viewingDistance);
+	private Collider[] Scan => Physics.OverlapSphere(transform.position, viewingDistance, notGroundLayers);
 
+	//TODO: random hareket için geçici kod güzelini yazınca bunu sil.
 	private void CalculateMovement()
 	{
 		int randX = UnityEngine.Random.Range(-1, 2);
@@ -173,6 +216,7 @@ public partial class Rabbit : MonoBehaviour
 		moveTo = new Vector3(transform.position.x + randX, transform.position.y, transform.position.z + randZ);
 	}
 
+	//TODO: random hareket için geçici kod güzelini yazınca bunu sil.
 	private void Move()
 	{
 		transform.forward = moveTo-transform.position;
