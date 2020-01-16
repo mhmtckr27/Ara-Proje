@@ -6,8 +6,8 @@ TagManager:
   tags:
   - Fox
   - Ground
-  - Plant
-  - Food
+  - Rabbit
+  - Grass
   layers:
   - Default
   - TransparentFX

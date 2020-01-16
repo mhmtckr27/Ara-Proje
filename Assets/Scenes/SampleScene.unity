@@ -287,7 +287,7 @@ PrefabInstance:
     - target: {fileID: -4216859302048453862, guid: 2768982f40c421e44b08b3735d371d65,
         type: 3}
       propertyPath: m_LocalPosition.x
-      value: 258.27954
+      value: 253.23
       objectReference: {fileID: 0}
     - target: {fileID: -4216859302048453862, guid: 2768982f40c421e44b08b3735d371d65,
         type: 3}
@@ -297,7 +297,7 @@ PrefabInstance:
     - target: {fileID: -4216859302048453862, guid: 2768982f40c421e44b08b3735d371d65,
         type: 3}
       propertyPath: m_LocalPosition.z
-      value: 252.02522
+      value: 247.23
       objectReference: {fileID: 0}
     - target: {fileID: -4216859302048453862, guid: 2768982f40c421e44b08b3735d371d65,
         type: 3}
@@ -364,7 +364,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 423785243}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 98b1ee0dbcac9a3489c0348d7ae0fc4e, type: 3}
   m_Name: 
@@ -380,6 +380,34 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 55
   col: {fileID: 423785248}
+--- !u!114 &423785245
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 423785243}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b8805534f0c458c45aebe7865667db47, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  foodSaturation: 50
+  waterSaturation: 50
+  reproductiveUrge: 0
+  energy: 20
+  viewingDistance: 10
+  remainingLifeTime: 120
+  energyConsumeSpeed: 5
+  notGroundLayers:
+    serializedVersion: 2
+    m_Bits: 55
+  col: {fileID: 0}
+  dangers:
+  - Fox
+  foods:
+  - Grass
+  moveSpeed: 1
 --- !u!65 &423785248
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -388,7 +416,7 @@ BoxCollider:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 423785243}
   m_Material: {fileID: 0}
-  m_IsTrigger: 0
+  m_IsTrigger: 1
   m_Enabled: 1
   serializedVersion: 2
   m_Size: {x: 0.51843625, y: 0.76512265, z: 0.8202632}
@@ -412,6 +440,33 @@ BoxCollider:
   serializedVersion: 2
   m_Size: {x: 0.4755, y: 1.7766867, z: 2.9746733}
   m_Center: {x: 0, y: 0.86729753, z: -0.18675667}
+--- !u!114 &459290911
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 459290909}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b8805534f0c458c45aebe7865667db47, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  foodSaturation: 50
+  waterSaturation: 50
+  reproductiveUrge: 0
+  energy: 20
+  viewingDistance: 10
+  remainingLifeTime: 120
+  energyConsumeSpeed: 5
+  notGroundLayers:
+    serializedVersion: 2
+    m_Bits: 55
+  col: {fileID: 459290910}
+  dangers: []
+  foods:
+  - Rabbit
+  moveSpeed: 1.25
 --- !u!1 &604731034
 GameObject:
   m_ObjectHideFlags: 0
@@ -558,7 +613,7 @@ PrefabInstance:
     - target: {fileID: -927199367670048503, guid: 7436bc390e20f4a4ab70f341df164ebc,
         type: 3}
       propertyPath: m_TagString
-      value: Plant
+      value: Grass
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 7436bc390e20f4a4ab70f341df164ebc, type: 3}
@@ -633,6 +688,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_IsActive
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -927199367670048503, guid: 20558d13e277a9540834e4ee8224d2c8,
+        type: 3}
+      propertyPath: m_TagString
+      value: Rabbit
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 20558d13e277a9540834e4ee8224d2c8, type: 3}
@@ -799,6 +859,33 @@ GameObject:
     type: 3}
   m_PrefabInstance: {fileID: 1321017400}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &2143295303
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2143295302}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b8805534f0c458c45aebe7865667db47, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  foodSaturation: 50
+  waterSaturation: 50
+  reproductiveUrge: 0
+  energy: 20
+  viewingDistance: 10
+  remainingLifeTime: 120
+  energyConsumeSpeed: 5
+  notGroundLayers:
+    serializedVersion: 2
+    m_Bits: 55
+  col: {fileID: 2143295306}
+  dangers: []
+  foods:
+  - Rabbit
+  moveSpeed: 1
 --- !u!65 &2143295306
 BoxCollider:
   m_ObjectHideFlags: 0
