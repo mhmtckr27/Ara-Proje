@@ -37,10 +37,10 @@ public partial class Animal : MonoBehaviour
 	Vector3 moveTo;
 	Priority currentPriority;
 	Dictionary<string, GameObject> objectsDictionary = new Dictionary<string, GameObject>();
-
+	
 	Vector3 firstPos;
 	Vector3 lastPos;
-
+	float timeToChangeDirection;
 	private void Start()
 	{
 		firstPos = transform.position;
@@ -98,16 +98,42 @@ public partial class Animal : MonoBehaviour
 		}
 		else if(currentPriority == Priority.Food)
 		{
-			FindAndConsumeFood();
+			if (!FindAndConsumeFood())
+			{
+				Explore();
+			}
 		}
 		else //currentPriority == Priority.Water
 		{
 			//Consume water
 		}
 	}
+	Quaternion quat;
+	private void ChangeDirection()
+	{
+		float angle = UnityEngine.Random.Range(-90f, 90f);
+		//Vector3 newUp = quat * Vector3.forward;
+		quat = Quaternion.AngleAxis(angle, Vector3.up);
+		//newUp.z = 0;
+		//newUp.Normalize();
+		timeToChangeDirection = UnityEngine.Random.Range(.25f, 1.5f);
+	}
+
+	private void Explore()
+	{
+		timeToChangeDirection -= Time.deltaTime;
+
+		if (timeToChangeDirection <= 0)
+		{
+			ChangeDirection();
+		}
+		transform.rotation = Quaternion.Slerp(transform.rotation, quat, 0.1f);
+		transform.position = Vector3.MoveTowards(transform.position, transform.position + transform.forward, 0.1f * moveSpeed);
+
+	}
 
 	//find ve consume u seperate et
-	private void FindAndConsumeFood()
+	private bool FindAndConsumeFood()
 	{
 		//find food
 		GameObject foodFound = null;
@@ -120,7 +146,7 @@ public partial class Animal : MonoBehaviour
 		}
 		if (foodFound == null)
 		{
-			return;
+			return false;
 		}
 		//consume food
 		Quaternion lookAt = Quaternion.LookRotation(foodFound.transform.position - transform.position, transform.up);
@@ -136,6 +162,7 @@ public partial class Animal : MonoBehaviour
 		}
 		transform.rotation = Quaternion.Slerp(transform.rotation, lookAt, 0.1f);
 		transform.position = Vector3.MoveTowards(transform.position, transform.position + transform.forward, 0.1f * moveSpeed);
+		return true;
 	}
 
 	private bool Consume(GameObject priorityObj)
@@ -157,7 +184,7 @@ public partial class Animal : MonoBehaviour
 		//TODO: move to danger's script's hunt/findfood funtion
 		closestDanger.transform.LookAt(gameObject.transform);
 		transform.rotation = Quaternion.Slerp(transform.rotation, closestDanger.transform.rotation, 0.1f);
-		transform.position = Vector3.MoveTowards(transform.position, transform.position + transform.forward * moveSpeed, 0.1f);
+		transform.position = Vector3.MoveTowards(transform.position, transform.position + transform.forward, 0.1f * moveSpeed);
 	}
 
 	private GameObject FindClosestDanger()
@@ -166,6 +193,7 @@ public partial class Animal : MonoBehaviour
 		float currentDistance;
 		GameObject closestDanger = null;
 		GameObject currentDanger;
+		//TODO: IJobParallelFor kullanabilirsen kullan bu ve diğer for'lar için.
 		foreach (string danger in dangers)
 		{
 			if (objectsDictionary.TryGetValue(danger, out currentDanger))
@@ -195,6 +223,8 @@ public partial class Animal : MonoBehaviour
 		List<Collider> hits = Scan.ToList();
 		hits.Remove(col);
 
+		
+		//TODO: IJobParallelFor kullanabilirsen kullan = job system yani safe-multithreading gibi. Performansı müthiş artırır.
 		foreach (Collider collider in hits)
 		{
 			if (!objectsDictionary.ContainsKey(collider.tag))
@@ -210,8 +240,7 @@ public partial class Animal : MonoBehaviour
 				bool shouldReplace = ShouldReplace(objectInDictionary.transform.position, collider.gameObject.transform.position);
 				if (shouldReplace)
 				{
-					objectsDictionary.Remove(objectInDictionary.tag);
-					objectsDictionary.Add(collider.tag, collider.gameObject);
+					objectsDictionary[objectInDictionary.tag] = collider.gameObject;
 				}
 			}
 		}
@@ -243,7 +272,7 @@ public partial class Animal : MonoBehaviour
 		{
 			currentPriority = Priority.Water;
 		}
-		else
+		else if (reproductiveUrge >= 75)
 		{
 			currentPriority = Priority.Mate;
 		}
