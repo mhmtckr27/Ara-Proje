@@ -1,0 +1,150 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &1324990520878112819
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2609860186741264928}
+  - component: {fileID: 6441010292631201814}
+  - component: {fileID: 747485213912798447}
+  - component: {fileID: 7008342975739191423}
+  - component: {fileID: 7008342975739191363}
+  - component: {fileID: 7008342975739191362}
+  m_Layer: 0
+  m_Name: rabbitf
+  m_TagString: Rabbit
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2609860186741264928
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1324990520878112819}
+  m_LocalRotation: {x: 0, y: 1, z: 0, w: 0}
+  m_LocalPosition: {x: 248.96, y: 0, z: 249.98}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 180, z: 0}
+--- !u!33 &6441010292631201814
+MeshFilter:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1324990520878112819}
+  m_Mesh: {fileID: 4493585093827132993, guid: 20558d13e277a9540834e4ee8224d2c8, type: 3}
+--- !u!23 &747485213912798447
+MeshRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1324990520878112819}
+  m_Enabled: 1
+  m_CastShadows: 1
+  m_ReceiveShadows: 1
+  m_DynamicOccludee: 1
+  m_MotionVectors: 1
+  m_LightProbeUsage: 1
+  m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 2
+  m_RenderingLayerMask: 1
+  m_RendererPriority: 0
+  m_Materials:
+  - {fileID: -4770390735465466038, guid: 20558d13e277a9540834e4ee8224d2c8, type: 3}
+  - {fileID: -1580535799172915004, guid: 20558d13e277a9540834e4ee8224d2c8, type: 3}
+  - {fileID: -8848810374240701247, guid: 20558d13e277a9540834e4ee8224d2c8, type: 3}
+  m_StaticBatchInfo:
+    firstSubMesh: 0
+    subMeshCount: 0
+  m_StaticBatchRoot: {fileID: 0}
+  m_ProbeAnchor: {fileID: 0}
+  m_LightProbeVolumeOverride: {fileID: 0}
+  m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
+  m_PreserveUVs: 0
+  m_IgnoreNormalsForChartDetection: 0
+  m_ImportantGI: 0
+  m_StitchLightmapSeams: 1
+  m_SelectedEditorRenderState: 3
+  m_MinimumChartSize: 4
+  m_AutoUVMaxDistance: 0.5
+  m_AutoUVMaxAngle: 89
+  m_LightmapParameters: {fileID: 0}
+  m_SortingLayerID: 0
+  m_SortingLayer: 0
+  m_SortingOrder: 0
+--- !u!65 &7008342975739191423
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1324990520878112819}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 1
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Size: {x: 0.51843625, y: 0.76512265, z: 0.8202632}
+  m_Center: {x: 0, y: 0.38256133, z: 0.005963117}
+--- !u!114 &7008342975739191363
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1324990520878112819}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 98b1ee0dbcac9a3489c0348d7ae0fc4e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  foodSaturation: 50
+  waterSaturation: 50
+  reproductiveUrge: 0
+  energy: 20
+  viewingDistance: 10
+  remainingLifeTime: 120
+  energyConsumeSpeed: 5
+  notGroundLayers:
+    serializedVersion: 2
+    m_Bits: 55
+  col: {fileID: 7008342975739191423}
+--- !u!114 &7008342975739191362
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1324990520878112819}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b8805534f0c458c45aebe7865667db47, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  foodSaturation: 50
+  waterSaturation: 50
+  reproductiveUrge: 0
+  energy: 20
+  viewingDistance: 10
+  remainingLifeTime: 120
+  energyConsumeSpeed: 5
+  notGroundLayers:
+    serializedVersion: 2
+    m_Bits: 55
+  col: {fileID: 0}
+  dangers:
+  - Fox
+  foods:
+  - Grass
+  moveSpeed: 1

@@ -7,6 +7,7 @@ using System.Linq;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEditor;
 public partial class Animal : MonoBehaviour
 {
 	#region Constant Variable Declarations
@@ -18,6 +19,8 @@ public partial class Animal : MonoBehaviour
 	private const float maxEnergy = 100f;
 	private const float restLimit = 75f;//eğer tokluk ve suya doygunluk bu sınırın üstündeyse ve üreme dürtüsü de bunun altındaysa rest durumuna geçer.
 	#endregion
+
+	//TODO: hepsini rabbitdataya tasiyip minmaxslider ile cektigin degerler arasinda random deger uret. daha gercekci olur.
 	#region Inspector Fields
 	[SerializeField] [Range(0, maxFoodSaturation)] private float foodSaturation;//tokluk
 	[SerializeField] [Range(0, maxWaterSaturation)] private float waterSaturation;//suya doygunluk
@@ -32,8 +35,7 @@ public partial class Animal : MonoBehaviour
 	[SerializeField] private List<string> foods;
 	[SerializeField] private float moveSpeed;
 	#endregion
-
-
+	
 	Vector3 moveTo;
 	Priority currentPriority;
 	Dictionary<string, GameObject> objectsDictionary = new Dictionary<string, GameObject>();
@@ -41,9 +43,12 @@ public partial class Animal : MonoBehaviour
 	Vector3 firstPos;
 	Vector3 lastPos;
 	float timeToChangeDirection;
+
+	public RabbitData rabbitData;
 	private void Start()
 	{
 		firstPos = transform.position;
+		energyConsumeSpeed = rabbitData.foodSaturation;
 	}
 
 	private void Update()
@@ -58,7 +63,7 @@ public partial class Animal : MonoBehaviour
 	{
 		//TODO: bunu da bişeylere bağla işte bu kadar sade olmasın xd
 		lastPos = transform.position;
-		energy -= Vector3.Distance(lastPos, firstPos) * energyConsumeSpeed * Time.deltaTime;
+		//energy -= Vector3.Distance(lastPos, firstPos) * energyConsumeSpeed * Time.deltaTime;
 		firstPos = lastPos;
 		remainingLifeTime -= Time.deltaTime;
 		if (remainingLifeTime <= 0)
