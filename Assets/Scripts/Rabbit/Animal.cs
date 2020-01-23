@@ -36,6 +36,15 @@ public partial class Animal : MonoBehaviour
 	[SerializeField] private float moveSpeed;
 	#endregion
 	
+	[Serializable]
+	private class movesettings
+	{
+		[SerializeField]
+		private int a;
+	}
+	[SerializeField]
+	private movesettings mov = new movesettings();
+
 	Vector3 moveTo;
 	Priority currentPriority;
 	Dictionary<string, GameObject> objectsDictionary = new Dictionary<string, GameObject>();
