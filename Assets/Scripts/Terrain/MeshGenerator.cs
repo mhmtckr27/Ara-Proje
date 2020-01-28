@@ -6,7 +6,7 @@ using UnityEngine;
 
 public static class MeshGenerator
 {
-	public static MeshData GenerateTerrainMesh(float[,] heightMap, float heightMultiplier, AnimationCurve _meshHeightCurve, int levelOfDetail, bool useFlatShading)
+	public static MeshData GenerateTerrainMesh(float[,] heightMap, float heightMultiplier, AnimationCurve _meshHeightCurve, int levelOfDetail, bool useFlatShading, GameObject water)
 	{
 		AnimationCurve meshHeightCurve = new AnimationCurve(_meshHeightCurve.keys);
 		int meshSimplificationIncrement = (levelOfDetail == 0) ? 1 : levelOfDetail * 2;
@@ -53,7 +53,7 @@ public static class MeshGenerator
 				float height = meshHeightCurve.Evaluate(heightMap[x, y]) * heightMultiplier;
 				Vector3 vertexPosition = new Vector3(topLeftX + percent.x * meshSizeUnsimplified, height, topLeftZ - percent.y * meshSizeUnsimplified);
 
-				meshData.AddVertex(vertexPosition, percent, vertexIndex);
+				meshData.AddVertex(vertexPosition, percent, vertexIndex, water);
 
 				if (x < borderedSize - 1 && y < borderedSize - 1)
 				{
@@ -88,7 +88,6 @@ public class MeshData
 	private int borderTriangleIndex;
 
 	private bool useFlatShading;
-
 	public MeshData(int verticesPerLine, bool useFlatShading)
 	{
 		this.useFlatShading = useFlatShading;
@@ -100,7 +99,7 @@ public class MeshData
 		borderTriangles = new int[24 * verticesPerLine];
 	}
 
-	public void AddVertex(Vector3 vertexPosition, Vector2 uv, int vertexIndex)
+	public void AddVertex(Vector3 vertexPosition, Vector2 uv, int vertexIndex, GameObject water)
 	{
 		if (vertexIndex < 0)
 		{
