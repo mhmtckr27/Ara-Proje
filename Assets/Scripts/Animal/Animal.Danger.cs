@@ -2,15 +2,14 @@
 Code by Hayri Cakir
 www.hayricakir.com
 */
+using UnityEngine;
+
 public partial class Animal
 {
-	enum Priority
+	[System.Flags]
+	public enum LivingEntity
 	{
-		Danger,
-		Food,
-		Water,
-		Mate,
-		Rest,
-		Explore
+		Rabbit,
+		Fox
 	}
 }

@@ -12,8 +12,8 @@ GameObject:
   - component: {fileID: 6441010292631201814}
   - component: {fileID: 747485213912798447}
   - component: {fileID: 7008342975739191423}
-  - component: {fileID: 7008342975739191363}
   - component: {fileID: 7008342975739191362}
+  - component: {fileID: 6392995485981811604}
   m_Layer: 0
   m_Name: rabbitf
   m_TagString: Rabbit
@@ -97,29 +97,6 @@ BoxCollider:
   serializedVersion: 2
   m_Size: {x: 0.51843625, y: 0.76512265, z: 0.8202632}
   m_Center: {x: 0, y: 0.38256133, z: 0.005963117}
---- !u!114 &7008342975739191363
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1324990520878112819}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 98b1ee0dbcac9a3489c0348d7ae0fc4e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  foodSaturation: 50
-  waterSaturation: 50
-  reproductiveUrge: 0
-  energy: 20
-  viewingDistance: 10
-  remainingLifeTime: 120
-  energyConsumeSpeed: 5
-  notGroundLayers:
-    serializedVersion: 2
-    m_Bits: 55
-  col: {fileID: 7008342975739191423}
 --- !u!114 &7008342975739191362
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -132,19 +109,53 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b8805534f0c458c45aebe7865667db47, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  foodSaturation: 50
-  waterSaturation: 50
-  reproductiveUrge: 0
-  energy: 20
-  viewingDistance: 10
-  remainingLifeTime: 120
-  energyConsumeSpeed: 5
+  viewRadiusFront: 0
+  viewAngleFront: 0
+  viewRadiusBack: 0
+  viewAngleBack: 360
+  basicAttributes:
+    foodSaturationRNG: {x: 0, y: 0}
+    waterSaturationRNG: {x: 0, y: 0}
+    reproductiveUrgeRNG: {x: 0, y: 0}
+    energyRNG: {x: 0, y: 0}
+    remainingLifeTimeRNG: {x: 0, y: 0}
+    energyConsumeSpeedRNG: {x: 0, y: 0}
+    moveSpeedRNG: {x: 0, y: 0}
+    targetMask:
+      serializedVersion: 2
+      m_Bits: 0
+    obstacleMask:
+      serializedVersion: 2
+      m_Bits: 0
+    viewRadiusFrontRNG: {x: 0, y: 0}
+    viewAngleFrontRNG: {x: 0, y: 0}
+    viewRadiusBackRNG: {x: 0, y: 0}
+    viewAngleBackRNG: {x: 0, y: 0}
   notGroundLayers:
     serializedVersion: 2
     m_Bits: 55
   col: {fileID: 0}
-  dangers:
-  - Fox
   foods:
   - Grass
-  moveSpeed: 1
+  diet: 0
+  dangers: 0
+  visibleTargets: []
+--- !u!95 &6392995485981811604
+Animator:
+  serializedVersion: 3
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1324990520878112819}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: d71bdc25da248ba4c948b7b4a9dab322, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 1
+  m_LinearVelocityBlending: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorControllerStateOnDisable: 0

@@ -2,15 +2,12 @@
 Code by Hayri Cakir
 www.hayricakir.com
 */
+using UnityEngine;
+
 public partial class Animal
 {
-	enum Priority
+	public struct Genes
 	{
-		Danger,
-		Food,
-		Water,
-		Mate,
-		Rest,
-		Explore
+
 	}
 }
