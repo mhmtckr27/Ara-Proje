@@ -25,7 +25,7 @@ public partial class Animal : MonoBehaviour
 	private const float restLimit = 90;//eğer tokluk ve suya doygunluk bu sınırın üstündeyse ve üreme dürtüsü de bunun altındaysa rest durumuna geçer.
 	private const float criticalLimit = 25f;
 	private const float forgetDangerTime = 10f;
-	private const float targetNearThreshold = 0.1f;
+	private const float targetNearThreshold = 1f;
 	private float stamina;
 	private float charisma;
 	#endregion
@@ -102,7 +102,12 @@ public partial class Animal : MonoBehaviour
 		Initialize();
 		firstPos = transform.position;
 		StartCoroutine("FindTargetsWithDelay", .2f);
+		navMeshAgent.updateRotation = false;
 	}
+
+	public float wanderTimer;
+	public float wanderRadius;
+	private float timer;
 
 	private void Update()
 	{
@@ -239,6 +244,9 @@ public partial class Animal : MonoBehaviour
 		
 		viewRadiusFront = UnityEngine.Random.Range(fieldOfView.viewRadiusFrontRNG.x, fieldOfView.viewRadiusFrontRNG.y);
 		viewRadiusBack = UnityEngine.Random.Range(fieldOfView.viewRadiusBackRNG.x, viewRadiusFront);
+
+		FillList(diet, dietList);
+		FillList(dangers, dangerList);
 	}
 
 	private void Consume()
@@ -307,6 +315,28 @@ public partial class Animal : MonoBehaviour
 
 	private void Explore()
 	{
+		timer += Time.deltaTime;
+
+		if (timer >= wanderTimer)
+		{
+			Vector3 newPos = RandomNavSphere(transform.position, wanderRadius, -1);
+			navMeshAgent.SetDestination(newPos);
+			timer = 0;
+		}
+	}
+
+
+	private Vector3 RandomNavSphere(Vector3 origin, float dist, LayerMask layerMask)
+	{
+		Vector3 randDirection = UnityEngine.Random.insideUnitSphere * dist;
+
+		randDirection += origin;
+
+		NavMeshHit navHit;
+
+		NavMesh.SamplePosition(randDirection, out navHit, dist, layerMask);
+
+		return navHit.position;
 	}
 
 	private void ChooseAction()
