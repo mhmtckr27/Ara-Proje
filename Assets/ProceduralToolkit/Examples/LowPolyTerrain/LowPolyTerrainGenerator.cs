@@ -66,7 +66,6 @@ namespace ProceduralToolkit.Examples
                     float height01 = GetHeight(x + 0, z + 1, xSegments, zSegments, noiseOffset, config.noiseScale);
                     float height10 = GetHeight(x + 1, z + 0, xSegments, zSegments, noiseOffset, config.noiseScale);
                     float height11 = GetHeight(x + 1, z + 1, xSegments, zSegments, noiseOffset, config.noiseScale);
-
                     var vertex00 = new Vector3((x + 0)*xStep, height00*config.terrainSize.y, (z + 0)*zStep);
                     var vertex01 = new Vector3((x + 0)*xStep, height01*config.terrainSize.y, (z + 1)*zStep);
                     var vertex10 = new Vector3((x + 1)*xStep, height10*config.terrainSize.y, (z + 0)*zStep);

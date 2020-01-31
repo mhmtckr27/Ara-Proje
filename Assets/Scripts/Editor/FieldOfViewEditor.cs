@@ -32,7 +32,12 @@ public class FieldOfViewEditor : Editor {
 
 		Handles.color = Color.red;
 		foreach (GameObject visibleTarget in animal.objectsDictionary.Values) {
-			Handles.DrawLine (animal.transform.position, visibleTarget.transform.position);
+			try
+			{
+				Handles.DrawLine (animal.transform.position, visibleTarget.transform.position);
+
+			}
+			catch(MissingReferenceException exception) { }
 		}
 	}
 

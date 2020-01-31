@@ -9,6 +9,7 @@ TagManager:
   - Rabbit
   - Grass
   - Terrain
+  - Water
   layers:
   - Default
   - TransparentFX

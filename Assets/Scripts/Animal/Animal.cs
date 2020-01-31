@@ -10,6 +10,7 @@ using UnityEngine;
 using UnityEditor;
 using System;
 using UnityEngine.AI;
+using UnityEngine.Events;
 
 public partial class Animal : MonoBehaviour
 {
@@ -26,19 +27,20 @@ public partial class Animal : MonoBehaviour
 	private const float criticalLimit = 25f;
 	private const float forgetDangerTime = 10f;
 	private const float targetNearThreshold = 1f;
+	private const string waterTag = "Water";
 	private float stamina;
 	private float charisma;
 	#endregion
 
 	#region Basic Animal Attributes
-	private float foodSaturation;//tokluk
-	private float waterSaturation;//suya doygunluk
-	private float reproductiveUrge;//suya doygunluk
-	private float energy;
-	private float viewingDistance;
-	private float remainingLifeTime;
-	private float energyConsumeSpeed;
-	private float moveSpeed;
+	public float foodSaturation;//tokluk
+	public float waterSaturation;//suya doygunluk
+	public float reproductiveUrge;//suya doygunluk
+	public float energy;
+	public float viewingDistance;
+	public float remainingLifeTime;
+	public float energyConsumeSpeed;
+	public float moveSpeed;
 	[Range(0,maxViewingDistance)] public float viewRadiusFront;
 	[Range(0, 360)] public float viewAngleFront;
 	[Range(0, maxViewingDistance)] public float viewRadiusBack;
@@ -67,7 +69,14 @@ public partial class Animal : MonoBehaviour
 	float timeLeftToForgetDanger;
 	private List<string> dietList = new List<string>();
 	private List<string> dangerList = new List<string>();
-
+	private UnityAction ready;
+	private bool isReady = true;
+	private float readyTime1 = 5f;
+	private float readyTime2;
+	private void IsReady()
+	{
+		isReady = true;
+	}
 	#if UNITY_EDITOR
 	private void OnValidate()
 	{
@@ -103,6 +112,7 @@ public partial class Animal : MonoBehaviour
 		firstPos = transform.position;
 		StartCoroutine("FindTargetsWithDelay", .2f);
 		navMeshAgent.updateRotation = false;
+		ready += IsReady;
 	}
 
 	public float wanderTimer;
@@ -111,15 +121,21 @@ public partial class Animal : MonoBehaviour
 
 	private void Update()
 	{
+		Debug.Log(readyTime2);
+		if(readyTime2 <= 0f)
+		{
+			isReady = true;
+		}
 		DeterminePriority();
 		ChooseAction();
 		Consume();
+		readyTime2 -= Time.deltaTime;
 		//GetComponent<NavMeshAgent>().SetDestination(Vector3.zero);
 	}
 
 	#region Find targets within field of view related stuff
 
-	private Collider[] ScanFieldOfView => Physics.OverlapSphere(transform.position, viewRadiusFront, fieldOfView.targetMask);
+	private Collider[] ScanFieldOfView => Physics.OverlapSphere(transform.position, viewRadiusFront, fieldOfView.targetMask, QueryTriggerInteraction.Collide);
 	private bool IsDuplicate(Collider collider) => objectsDictionary.ContainsKey(collider.tag);
 	IEnumerator FindTargetsWithDelay(float delay)
 	{
@@ -352,10 +368,12 @@ public partial class Animal : MonoBehaviour
 		{
 			//Escape1();
 		}
-		else if(currentPriority == Priority.Food)
+		else if (currentPriority == Priority.Food)
 		{
 			if (!EatFood())
 			{
+				Debug.LogError("ACIZ ACCC");
+
 				Explore();
 			}
 		}
@@ -368,10 +386,41 @@ public partial class Animal : MonoBehaviour
 		{
 			//Go to mate if you like him/her.
 		}
-		else //currentPriority == Priority.Water
+		else if (currentPriority == Priority.Water)
 		{
-			//Consume water
+			if (!DrinkWater())
+			{
+				Explore();
+			}
 		}
+		else //currentpriority == explore
+		{
+			Explore();
+		}
+	}
+
+	private bool DrinkWater()
+	{
+		GameObject waterFound = FindWater();
+		if(waterFound == null)
+		{
+			return false;
+		}
+		navMeshAgent.SetDestination(waterFound.transform.position);
+		if (TargetNear(waterFound) && isReady)
+		{
+			isReady = false;
+			readyTime2 = readyTime1;
+			waterSaturation += 20;
+		}
+		return true;
+	}
+
+	private GameObject FindWater()
+	{
+		GameObject waterFound;
+		objectsDictionary.TryGetValue(waterTag, out waterFound);
+		return waterFound;
 	}
 
 	Quaternion quat;
@@ -409,8 +458,10 @@ public partial class Animal : MonoBehaviour
 		navMeshAgent.SetDestination(foodFound.transform.position);
 
 		//TODO: buraları düzenle hardcodingi düzelt
-		if (TargetNear())
+		if (TargetNear(foodFound) && isReady)
 		{
+			readyTime2 = readyTime1;
+			isReady = false;
 			objectsDictionary.Remove(foodFound.tag);
 			Destroy(foodFound);
 			foodSaturation += 20;
@@ -430,11 +481,12 @@ public partial class Animal : MonoBehaviour
 				break;
 			}
 		}
-
+		
 		return foodFound;
 	}
 
-	private bool TargetNear() => navMeshAgent.hasPath && navMeshAgent.remainingDistance < targetNearThreshold;
+	//TODO: calismiyor, daha iyi bir yol bul 
+	private bool TargetNear(GameObject target) => (target.transform.position - transform.position).sqrMagnitude < targetNearThreshold && navMeshAgent.remainingDistance < targetNearThreshold;
 
 	//private void Escape()
 	//{
