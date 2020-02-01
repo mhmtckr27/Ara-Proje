@@ -2,42 +2,43 @@
 using System.Collections;
 using UnityEditor;
 
-[CustomEditor (typeof (Animal))]
+[CustomEditor (typeof (FieldOfView))]
+
 public class FieldOfViewEditor : Editor {
 
 	void OnSceneGUI() {
-		Animal animal = (Animal)target;
+		FieldOfView fieldOfView = (FieldOfView)target;
 
-		Vector3 viewAngleFA = animal.DirFromAngle(-animal.viewAngleFront / 2, false);
-		Vector3 viewAngleFB = animal.DirFromAngle(animal.viewAngleFront / 2, false);
-		float degreesToDrawFront = animal.viewAngleFront < 180 ? (-Vector3.Angle(viewAngleFA, viewAngleFB)) : -360 + Vector3.Angle(viewAngleFA, viewAngleFB);
+		Vector3 viewAngleFA = fieldOfView.DirFromAngle(-fieldOfView.viewAngleFront / 2, false);
+		Vector3 viewAngleFB = fieldOfView.DirFromAngle(fieldOfView.viewAngleFront / 2, false);
+		float degreesToDrawFront = fieldOfView.viewAngleFront < 180 ? (-Vector3.Angle(viewAngleFA, viewAngleFB)) : -360 + Vector3.Angle(viewAngleFA, viewAngleFB);
 
-		Vector3 viewAngleBA = animal.DirFromAngle(-animal.viewAngleBack / 2, false);
-		Vector3 viewAngleBB = animal.DirFromAngle(animal.viewAngleBack / 2, false);
-		float degreesToDrawBack = animal.viewAngleBack < 180 ? (-Vector3.Angle(viewAngleBA, viewAngleBB)) : -360 + Vector3.Angle(viewAngleBA, viewAngleBB);
+		Vector3 viewAngleBA = fieldOfView.DirFromAngle(-fieldOfView.viewAngleBack / 2, false);
+		Vector3 viewAngleBB = fieldOfView.DirFromAngle(fieldOfView.viewAngleBack / 2, false);
+		float degreesToDrawBack = fieldOfView.viewAngleBack < 180 ? (-Vector3.Angle(viewAngleBA, viewAngleBB)) : -360 + Vector3.Angle(viewAngleBA, viewAngleBB);
 
 
 		//ön görüş alanını görsel olarak editöre aktarır
 		Handles.color = Color.white;
-		Handles.DrawLine(animal.transform.position, animal.transform.position + viewAngleFA * animal.viewRadiusFront);
-		Handles.DrawLine(animal.transform.position, animal.transform.position + viewAngleFB * animal.viewRadiusFront);
-		Handles.DrawWireArc(animal.transform.position, Vector3.up, viewAngleFB, degreesToDrawFront, animal.viewRadiusFront);
+		Handles.DrawLine(fieldOfView.transform.position, fieldOfView.transform.position + viewAngleFA * fieldOfView.viewRadiusFront);
+		Handles.DrawLine(fieldOfView.transform.position, fieldOfView.transform.position + viewAngleFB * fieldOfView.viewRadiusFront);
+		Handles.DrawWireArc(fieldOfView.transform.position, Vector3.up, viewAngleFB, degreesToDrawFront, fieldOfView.viewRadiusFront);
 
 		//arka görüş alanını görsel olarak editöre aktarır
 		Handles.color = Color.black;
-		Handles.DrawLine(animal.transform.position, animal.transform.position - viewAngleBA * animal.viewRadiusBack);
-		Handles.DrawLine(animal.transform.position, animal.transform.position - viewAngleBB * animal.viewRadiusBack);
-		Handles.DrawWireArc(animal.transform.position, Vector3.up, -viewAngleBB, degreesToDrawBack, animal.viewRadiusBack);
+		Handles.DrawLine(fieldOfView.transform.position, fieldOfView.transform.position - viewAngleBA * fieldOfView.viewRadiusBack);
+		Handles.DrawLine(fieldOfView.transform.position, fieldOfView.transform.position - viewAngleBB * fieldOfView.viewRadiusBack);
+		Handles.DrawWireArc(fieldOfView.transform.position, Vector3.up, -viewAngleBB, degreesToDrawBack, fieldOfView.viewRadiusBack);
 
 
 		Handles.color = Color.red;
-		foreach (GameObject visibleTarget in animal.objectsDictionary.Values) {
+		foreach (GameObject visibleTarget in fieldOfView.animalScript.objectsDictionary.Values) {
 			try
 			{
-				Handles.DrawLine (animal.transform.position, visibleTarget.transform.position);
+				Handles.DrawLine (fieldOfView.transform.position, visibleTarget.transform.position);
 
 			}
-			catch(MissingReferenceException exception) { }
+			catch (MissingReferenceException) { }
 		}
 	}
 

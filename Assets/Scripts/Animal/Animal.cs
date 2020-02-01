@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
 using System;
+using UnityEngine.UI;
 using UnityEngine.AI;
 using UnityEngine.Events;
 
@@ -19,10 +20,11 @@ public partial class Animal : MonoBehaviour
 	private const float maxFoodSaturation = 100f;
 	private const float maxWaterSaturation = 100f;
 	private const float maxReproductiveUrge = 100f;
-	private const float maxViewingDistance = 20f;
 	private const float maxEnergy = 100f;
 	private const float maxEnergyConsumeSpeed = 20;
 	private const float maxMoveSpeed = 20;
+	private const float maxAngularSpeed = 360;
+	private const float maxAcceleration = 20;
 	private const float restLimit = 90;//eğer tokluk ve suya doygunluk bu sınırın üstündeyse ve üreme dürtüsü de bunun altındaysa rest durumuna geçer.
 	private const float criticalLimit = 25f;
 	private const float forgetDangerTime = 10f;
@@ -33,46 +35,45 @@ public partial class Animal : MonoBehaviour
 	#endregion
 
 	#region Basic Animal Attributes
-	public float foodSaturation;//tokluk
-	public float waterSaturation;//suya doygunluk
-	public float reproductiveUrge;//suya doygunluk
-	public float energy;
-	public float viewingDistance;
-	public float remainingLifeTime;
-	public float energyConsumeSpeed;
-	public float moveSpeed;
-	[Range(0,maxViewingDistance)] public float viewRadiusFront;
-	[Range(0, 360)] public float viewAngleFront;
-	[Range(0, maxViewingDistance)] public float viewRadiusBack;
-	[Range(0, 360)] public float viewAngleBack;
+	private float _foodSaturation;//tokluk
+	private float _waterSaturation;//suya doygunluk
+	private float _reproductiveUrge;//suya doygunluk
+	private float _energy;
+	private float _remainingLifeTime;
+	private float _moveSpeed;
+	private float _angularSpeed;
+	private float _acceleration;
+	private float _energyConsumeSpeed;
 	#endregion
 
 	#region Inspector Fields
 	[EnumFlags] [SerializeField] private Diet diet;
 	[EnumFlags] [SerializeField] private LivingEntity dangers;
-	[Tooltip("Basic attributes which are randomly generated from range")]
+	[Tooltip("Basic attributes which are randomly generated from range(RNG stands for range)")]
 	[SerializeField] private BasicAttributes basicAttributes;
-	[Tooltip("Field of view related attributes")]
+	[SerializeField] private AnimalStatsUI animalStatsUI;
 	[SerializeField] private FieldOfView fieldOfView;
 	[SerializeField] private new Collider collider;
 	[SerializeField] private NavMeshAgent navMeshAgent;
 	#endregion
 
-
-	Vector3 moveTo;
-	Priority currentPriority;
+	public Priority currentPriority;
 	public Dictionary<string, GameObject> objectsDictionary = new Dictionary<string, GameObject>();
-	
-	Vector3 firstPos;
-	Vector3 lastPos;
-	float timeToChangeDirection;
-	float timeLeftToForgetDanger;
 	private List<string> dietList = new List<string>();
 	private List<string> dangerList = new List<string>();
+	
+	float timeLeftToForgetDanger;
+	Vector3 firstPos;
+	Vector3 lastPos;
 	private UnityAction ready;
 	private bool isReady = true;
 	private float readyTime1 = 5f;
 	private float readyTime2;
+
+	public float wanderTimer;
+	public float wanderRadius;
+	private float timer;
+
 	private void IsReady()
 	{
 		isReady = true;
@@ -80,12 +81,12 @@ public partial class Animal : MonoBehaviour
 	#if UNITY_EDITOR
 	private void OnValidate()
 	{
-		viewAngleBack = 360 - viewAngleFront;
 		FillList(diet, dietList);
 		FillList(dangers, dangerList);
-
 	}
 	#endif
+
+	#region Filling diet and danger lists
 	//---------------------------------------------------------------------------------------------
 	/// <summary>
 	/// Fills a list from enum flags.
@@ -103,25 +104,20 @@ public partial class Animal : MonoBehaviour
 				list.Add(value);
 			}
 		}
-
 	}
+	#endregion
 	private void Start()
 	{
 		//TODO: call initialize from here.
 		Initialize();
 		firstPos = transform.position;
-		StartCoroutine("FindTargetsWithDelay", .2f);
 		navMeshAgent.updateRotation = false;
 		ready += IsReady;
 	}
 
-	public float wanderTimer;
-	public float wanderRadius;
-	private float timer;
-
 	private void Update()
 	{
-		Debug.Log(readyTime2);
+		//TODO: duzenle burayi
 		if(readyTime2 <= 0f)
 		{
 			isReady = true;
@@ -130,167 +126,46 @@ public partial class Animal : MonoBehaviour
 		ChooseAction();
 		Consume();
 		readyTime2 -= Time.deltaTime;
-		//GetComponent<NavMeshAgent>().SetDestination(Vector3.zero);
 	}
 
-	#region Find targets within field of view related stuff
-
-	private Collider[] ScanFieldOfView => Physics.OverlapSphere(transform.position, viewRadiusFront, fieldOfView.targetMask, QueryTriggerInteraction.Collide);
-	private bool IsDuplicate(Collider collider) => objectsDictionary.ContainsKey(collider.tag);
-	IEnumerator FindTargetsWithDelay(float delay)
-	{
-		while (true)
-		{
-			yield return new WaitForSeconds(delay);
-			FindVisibleTargets();
-		}
-	}
-
-	private void FindVisibleTargets()
-	{
-		objectsDictionary.Clear();
-		List<Collider> targetsInViewRadius = ScanFieldOfView.ToList();
-		targetsInViewRadius.Remove(collider);
-
-		for (int i = 0; i < targetsInViewRadius.Count; i++)
-		{
-			Collider target = targetsInViewRadius[i];
-			Vector3 dirToTarget = (target.transform.position - transform.position).normalized;
-			//ön görüş açısında neler var onu bulur
-			if (Vector3.Angle(transform.forward, dirToTarget) < viewAngleFront / 2)
-			{
-				float dstToTarget = Vector3.Distance(transform.position, target.transform.position);
-
-				if (!Physics.Raycast(transform.position, dirToTarget, dstToTarget, fieldOfView.obstacleMask))
-				{
-					if (IsDuplicate(target))
-					{
-						AddCloserOneToDictionary(target);
-					}
-					else
-					{
-						objectsDictionary.Add(target.tag, target.gameObject);
-					}
-				}
-			}
-			//Arka görüş açısında neler var onu bulur
-			else if(Vector3.Angle(-transform.forward, dirToTarget) < viewAngleBack / 2)
-			{
-				float dstToTarget = Vector3.Distance(transform.position, target.transform.position);
-
-				if(viewRadiusBack > dstToTarget)
-				{
-					if(!Physics.Raycast(transform.position, dirToTarget, dstToTarget, fieldOfView.obstacleMask))
-					{
-						if (IsDuplicate(target))
-						{
-							AddCloserOneToDictionary(target);
-						}
-						else
-						{
-							objectsDictionary.Add(target.tag, target.gameObject);
-						}
-					}
-				}
-			}
-		}
-	}
-
-	private void AddCloserOneToDictionary(Collider collider)
-	{           
-		//aynı tipte varlık onceden eklenmisse, hangisi yakınsa o bulunarak guncellenir.
-		GameObject objectInDictionary;
-		objectsDictionary.TryGetValue(collider.tag, out objectInDictionary);
-		bool shouldReplace = ShouldReplace(objectInDictionary.transform.position, collider.gameObject.transform.position);
-		if (shouldReplace)
-		{
-			objectsDictionary[objectInDictionary.tag] = collider.gameObject;
-		}
-	}
-
-	public Vector3 DirFromAngle(float angleInDegrees, bool angleIsGlobal)
-	{
-		if (!angleIsGlobal)
-		{
-			angleInDegrees += transform.eulerAngles.y;
-		}
-		return new Vector3(Mathf.Sin(angleInDegrees * Mathf.Deg2Rad), 0, Mathf.Cos(angleInDegrees * Mathf.Deg2Rad));
-	}
-	private void CheckDuplicate(Collider collider)
-	{
-		if (!objectsDictionary.ContainsKey(collider.tag))
-		{
-			//aynı tipte varlık onceden eklenmemisse key, tagından olusturulur.
-			objectsDictionary.Add(collider.tag, collider.gameObject);
-		}
-		else
-		{
-			//aynı tipte varlık onceden eklenmisse, hangisi yakınsa o bulunarak guncellenir.
-			GameObject objectInDictionary;
-			objectsDictionary.TryGetValue(collider.tag, out objectInDictionary);
-			bool shouldReplace = ShouldReplace(objectInDictionary.transform.position, collider.gameObject.transform.position);
-			if (shouldReplace)
-			{
-				objectsDictionary[objectInDictionary.tag] = collider.gameObject;
-			}
-		}
-	}
-
-	private bool ShouldReplace(Vector3 obj1, Vector3 obj2)
-	{
-		float distToObj1 = Vector3.Distance(transform.position, obj1);
-		float distToObj2 = Vector3.Distance(transform.position, obj2);
-		return distToObj1 > distToObj2 ? true : false;
-	}
-
-	#endregion
 	public void Initialize()
 	{
-		foodSaturation = UnityEngine.Random.Range(basicAttributes.foodSaturationRNG.x, basicAttributes.foodSaturationRNG.y);
-		waterSaturation = UnityEngine.Random.Range(basicAttributes.waterSaturationRNG.x, basicAttributes.waterSaturationRNG.y);
-		reproductiveUrge = UnityEngine.Random.Range(basicAttributes.reproductiveUrgeRNG.x, basicAttributes.reproductiveUrgeRNG.y);
-		energy = UnityEngine.Random.Range(basicAttributes.energyRNG.x, basicAttributes.energyRNG.y);
-		//viewingDistance = Random.Range(baseAttributes.viewingDistanceRNG.x, baseAttributes.viewingDistanceRNG.y);
-		remainingLifeTime = UnityEngine.Random.Range(basicAttributes.remainingLifeTimeRNG.x, basicAttributes.remainingLifeTimeRNG.y);
-		energyConsumeSpeed = UnityEngine.Random.Range(basicAttributes.energyConsumeSpeedRNG.x, basicAttributes.energyConsumeSpeedRNG.y);
-		moveSpeed = UnityEngine.Random.Range(basicAttributes.moveSpeedRNG.x, basicAttributes.moveSpeedRNG.y);
-
-		viewAngleFront = UnityEngine.Random.Range(fieldOfView.viewAngleFrontRNG.x, fieldOfView.viewAngleFrontRNG.y);
-		viewAngleBack = 360-viewAngleFront;	
-		
-		viewRadiusFront = UnityEngine.Random.Range(fieldOfView.viewRadiusFrontRNG.x, fieldOfView.viewRadiusFrontRNG.y);
-		viewRadiusBack = UnityEngine.Random.Range(fieldOfView.viewRadiusBackRNG.x, viewRadiusFront);
+		FoodSaturation = UnityEngine.Random.Range(basicAttributes.foodSaturationRNG.x, basicAttributes.foodSaturationRNG.y);
+		WaterSaturation = UnityEngine.Random.Range(basicAttributes.waterSaturationRNG.x, basicAttributes.waterSaturationRNG.y);
+		ReproductiveUrge = UnityEngine.Random.Range(basicAttributes.reproductiveUrgeRNG.x, basicAttributes.reproductiveUrgeRNG.y);
+		Energy = UnityEngine.Random.Range(basicAttributes.energyRNG.x, basicAttributes.energyRNG.y);
+		RemainingLifeTime = UnityEngine.Random.Range(basicAttributes.remainingLifeTimeRNG.x, basicAttributes.remainingLifeTimeRNG.y);
+		MoveSpeed = UnityEngine.Random.Range(basicAttributes.moveSpeedRNG.x, basicAttributes.moveSpeedRNG.y);
+		AngularSpeed = UnityEngine.Random.Range(basicAttributes.angularSpeedRNG.x, basicAttributes.angularSpeedRNG.y);
+		Acceleration = UnityEngine.Random.Range(basicAttributes.accelerationRNG.x, basicAttributes.accelerationRNG.y);
+		_energyConsumeSpeed = UnityEngine.Random.Range(basicAttributes.energyConsumeSpeedRNG.x, basicAttributes.energyConsumeSpeedRNG.y);
 
 		FillList(diet, dietList);
 		FillList(dangers, dangerList);
 	}
-
 	private void Consume()
 	{
 		//TODO: bunu da bişeylere bağla işte bu kadar sade olmasın xd
 		lastPos = transform.position;
 		//energy -= Vector3.Distance(lastPos, firstPos) * energyConsumeSpeed * Time.deltaTime;
 		firstPos = lastPos;
-		remainingLifeTime -= Time.deltaTime;
-		if (remainingLifeTime <= 0)
+		RemainingLifeTime -= Time.deltaTime;
+		if (RemainingLifeTime <= 0)
 		{
 			Die(CauseOfDeath.OldAge);
 		}
 	}
-
 	private void Die(CauseOfDeath causeOfDeath)
 	{
 		Debug.Log(gameObject.name + " died of " + causeOfDeath);
 		//TODO: ölüm olayları ekle,animasyon vs, yan yatıp gözleri x_x(çarpı yap) bikaç saniye sonra yok olsun.
 		Destroy(gameObject);
 	}
-
 	private void Rest()
 	{
 		//TODO: enerji kazancını tokluk ve susamışlığa bağla, "wellness" veya "wellbeingness" fieldı koy.
-		energy += Time.deltaTime * Time.deltaTime;
+		Energy += Time.deltaTime * Time.deltaTime;
 	}
-
 	private void DeterminePriority()
 	{
 		//TODO: burası da cumbersome, belki düzenleyebilirsin.
@@ -303,22 +178,22 @@ public partial class Animal : MonoBehaviour
 			}
 		}
 
-		float maxPriority = Mathf.Min(foodSaturation, waterSaturation, maxReproductiveUrge - reproductiveUrge);
+		float maxPriority = Mathf.Min(FoodSaturation, WaterSaturation, maxReproductiveUrge - ReproductiveUrge);
 		if(maxPriority > restLimit)
 		{
 			currentPriority = Priority.Rest;
 		}
 		else if(maxPriority < criticalLimit)
 		{
-			if (maxPriority == foodSaturation)
+			if (maxPriority == FoodSaturation)
 			{
 				currentPriority = Priority.Food;
 			}
-			else if (maxPriority == waterSaturation)
+			else if (maxPriority == WaterSaturation)
 			{
 				currentPriority = Priority.Water;
 			}
-			else if (maxPriority == reproductiveUrge)
+			else if (maxPriority == ReproductiveUrge)
 			{
 				currentPriority = Priority.Mate;
 			}
@@ -328,33 +203,6 @@ public partial class Animal : MonoBehaviour
 			currentPriority = Priority.Explore;
 		}
 	}
-
-	private void Explore()
-	{
-		timer += Time.deltaTime;
-
-		if (timer >= wanderTimer)
-		{
-			Vector3 newPos = RandomNavSphere(transform.position, wanderRadius, -1);
-			navMeshAgent.SetDestination(newPos);
-			timer = 0;
-		}
-	}
-
-
-	private Vector3 RandomNavSphere(Vector3 origin, float dist, LayerMask layerMask)
-	{
-		Vector3 randDirection = UnityEngine.Random.insideUnitSphere * dist;
-
-		randDirection += origin;
-
-		NavMeshHit navHit;
-
-		NavMesh.SamplePosition(randDirection, out navHit, dist, layerMask);
-
-		return navHit.position;
-	}
-
 	private void ChooseAction()
 	{
 		//TODO: burası karışıyor vaziyet al!! bunu daha düzenli yapabilirsin bence?
@@ -372,8 +220,6 @@ public partial class Animal : MonoBehaviour
 		{
 			if (!EatFood())
 			{
-				Debug.LogError("ACIZ ACCC");
-
 				Explore();
 			}
 		}
@@ -399,6 +245,39 @@ public partial class Animal : MonoBehaviour
 		}
 	}
 
+	#region Explore stuff
+	private Vector3 RandomNavSphere(Vector3 origin, float dist, LayerMask layerMask)
+	{
+		Vector3 randDirection = UnityEngine.Random.insideUnitSphere * dist;
+
+		randDirection += origin;
+
+		NavMeshHit navHit;
+
+		NavMesh.SamplePosition(randDirection, out navHit, dist, layerMask);
+
+		return navHit.position;
+	}
+	private void Explore()
+	{
+		timer += Time.deltaTime;
+
+		if (timer >= wanderTimer)
+		{
+			Vector3 newPos = RandomNavSphere(transform.position, wanderRadius, -1);
+			navMeshAgent.SetDestination(newPos);
+			timer = 0;
+		}
+	}
+	#endregion
+
+	#region Water stuff
+	private GameObject FindWater()
+	{
+		GameObject waterFound;
+		objectsDictionary.TryGetValue(waterTag, out waterFound);
+		return waterFound;
+	}
 	private bool DrinkWater()
 	{
 		GameObject waterFound = FindWater();
@@ -411,42 +290,26 @@ public partial class Animal : MonoBehaviour
 		{
 			isReady = false;
 			readyTime2 = readyTime1;
-			waterSaturation += 20;
+			WaterSaturation += 20;
 		}
 		return true;
 	}
+	#endregion
 
-	private GameObject FindWater()
+	#region Food stuff
+	private GameObject FindFood()
 	{
-		GameObject waterFound;
-		objectsDictionary.TryGetValue(waterTag, out waterFound);
-		return waterFound;
+		GameObject foodFound = null;
+		foreach (string food in dietList)
+		{
+			if (objectsDictionary.TryGetValue(food, out foodFound))
+			{
+				break;
+			}
+		}
+		
+		return foodFound;
 	}
-
-	Quaternion quat;
-	private void ChangeDirection()
-	{
-		float angle = UnityEngine.Random.Range(-90f, 90f);
-		//Vector3 newUp = quat * Vector3.forward;
-		quat = Quaternion.AngleAxis(angle, Vector3.up);
-		//newUp.z = 0;
-		//newUp.Normalize();
-		timeToChangeDirection = UnityEngine.Random.Range(.25f, 1.5f);
-	}
-
-	//private void Explore()
-	//{
-	//	timeToChangeDirection -= Time.deltaTime;
-
-	//	if (timeToChangeDirection <= 0)
-	//	{
-	//		ChangeDirection();
-	//	}
-	//	transform.rotation = Quaternion.Slerp(transform.rotation, quat, 0.1f);
-	//	transform.position = Vector3.MoveTowards(transform.position, transform.position + transform.forward, 0.1f * moveSpeed);
-
-	//}
-
 	private bool EatFood()
 	{
 		//find food
@@ -464,46 +327,13 @@ public partial class Animal : MonoBehaviour
 			isReady = false;
 			objectsDictionary.Remove(foodFound.tag);
 			Destroy(foodFound);
-			foodSaturation += 20;
-			energy += 20;
-			waterSaturation -= 5;
+			FoodSaturation += 20;
+			Energy += 20;
+			WaterSaturation -= 5;
 		}
 		return true;
 	}
-
-	private GameObject FindFood()
-	{
-		GameObject foodFound = null;
-		foreach (string food in dietList)
-		{
-			if (objectsDictionary.TryGetValue(food, out foodFound))
-			{
-				break;
-			}
-		}
-		
-		return foodFound;
-	}
-
-	//TODO: calismiyor, daha iyi bir yol bul 
-	private bool TargetNear(GameObject target) => (target.transform.position - transform.position).sqrMagnitude < targetNearThreshold && navMeshAgent.remainingDistance < targetNearThreshold;
-
-	//private void Escape()
-	//{
-	//	//GetComponent<Animator>().speed = moveSpeed;
-	//	//GetComponent<Animator>().SetTrigger("jump");
-	//	GameObject closestDanger = FindClosestDanger();
-	//	//TODO: move to danger's script's hunt/findfood funtion
-	//	closestDanger.transform.forward = new Vector3((transform.position - closestDanger.transform.position).x, 0, (transform.position - closestDanger.transform.position).z);
-	//	transform.rotation = Quaternion.Slerp(transform.rotation, closestDanger.transform.rotation, 0.1f);
-	//	//transform.forward = closestDanger.transform.forward;
-	//	Escape1();
-	//}
-
-	//private void Escape1()
-	//{
-	//	transform.position = Vector3.MoveTowards(transform.position, transform.position + transform.forward, 0.1f * moveSpeed);
-	//}
+	#endregion
 
 	private GameObject FindClosestDanger()
 	{
@@ -526,9 +356,19 @@ public partial class Animal : MonoBehaviour
 		}
 		return closestDanger;
 	}
+	//TODO: calismiyor, daha iyi bir yol bul 
+	private bool TargetNear(GameObject target) => (target.transform.position - transform.position).sqrMagnitude < targetNearThreshold && navMeshAgent.remainingDistance < targetNearThreshold;
+	//private void OnDrawGizmos() => Gizmos.DrawWireSphere(transform.position, fieldOfView.viewRadiusFront);
 
-	private void OnDrawGizmos() => Gizmos.DrawWireSphere(transform.position, viewingDistance);
-
+	[System.Serializable]
+	private class AnimalStatsUI
+	{
+		[SerializeField] public Image foodSaturationBar;
+		[SerializeField] public Image waterSaturationBar;
+		[SerializeField] public Image reproductionUrgeBar;
+		[SerializeField] public Image remainingLifeTimeBar;
+		[SerializeField] public Image energyBar;
+	}
 	[System.Serializable]
 	private class BasicAttributes
 	{
@@ -539,20 +379,8 @@ public partial class Animal : MonoBehaviour
 		[SerializeField] [MinMaxSlider(1, maxLifeTime)] public Vector2 remainingLifeTimeRNG;
 		[SerializeField] [MinMaxSlider(1, maxEnergyConsumeSpeed)] public Vector2 energyConsumeSpeedRNG;
 		[SerializeField] [MinMaxSlider(1, maxMoveSpeed)] public Vector2 moveSpeedRNG;
+		[SerializeField] [MinMaxSlider(1, maxAngularSpeed)] public Vector2 angularSpeedRNG;
+		[SerializeField] [MinMaxSlider(1, maxAcceleration)] public Vector2 accelerationRNG;
 
-	}
-	[System.Serializable]
-	private class FieldOfView
-	{
-		public LayerMask targetMask;
-		public LayerMask obstacleMask;
-		[Header("Front View")]
-		[SerializeField] [MinMaxSlider(0, maxViewingDistance)] public Vector2 viewRadiusFrontRNG;
-		[SerializeField] [MinMaxSlider(0, 360)] public Vector2 viewAngleFrontRNG;
-
-		//TODO: isi bitince sil. arka gorus on gorusun tumleyeni olacak.
-		[Header("Back View")]
-		[SerializeField] [MinMaxSlider(0, maxViewingDistance)] public Vector2 viewRadiusBackRNG;
-		[SerializeField] [MinMaxSlider(0, 360)] public Vector2 viewAngleBackRNG;
 	}
 }

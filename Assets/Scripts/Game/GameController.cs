@@ -33,17 +33,17 @@ public class GameController : MonoBehaviour
                 }
             }
         }
-        //for(int i = 0; i < 250; i++)
-        //{
-        //    float x = Random.Range(150, 350);
-        //    float z = Random.Range(150, 350);
+        for (int i = 0; i < 250; i++)
+        {
+            float x = Random.Range(150, 350);
+            float z = Random.Range(150, 350);
 
-        //    RaycastHit hit;
-        //    if (Physics.Raycast(new Vector3(x, -1, z), Vector3.down, out hit, Mathf.Infinity, groundLayer) && hit.distance < 19)
-        //    {
-        //        Instantiate(bunny, hit.point + Vector3.up * 0.25f, Quaternion.identity);
-        //    }
-        //}     
+            RaycastHit hit;
+            if (Physics.Raycast(new Vector3(x, -1, z), Vector3.down, out hit, Mathf.Infinity, groundLayer) && hit.distance < 19)
+            {
+                Instantiate(bunny, hit.point + Vector3.up * 0.25f, Quaternion.identity);
+            }
+        }
         ////for(int i = 0; i < 100; i++)
         ////{
         ////    float x = Random.Range(200, 320);

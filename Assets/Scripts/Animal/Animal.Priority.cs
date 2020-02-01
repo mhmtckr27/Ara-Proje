@@ -4,7 +4,7 @@ www.hayricakir.com
 */
 public partial class Animal
 {
-	enum Priority
+	public enum Priority
 	{
 		Danger,
 		Food,
