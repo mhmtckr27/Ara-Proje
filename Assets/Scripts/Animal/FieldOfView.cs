@@ -7,6 +7,7 @@ public class FieldOfView : MonoBehaviour
 {
 	private const float maxViewingDistance = 20f;
 
+	[HideInInspector] public float viewAngleDanger;
 	[HideInInspector] public float viewRadiusFront;
 	[HideInInspector] public float viewAngleFront;
 	[HideInInspector] public float viewRadiusBack;
@@ -15,6 +16,10 @@ public class FieldOfView : MonoBehaviour
 	[Header("Parent Related Stuff")]
 	[SerializeField] public Animal animalScript;
 	[SerializeField] private Collider parentCollider;
+
+	[Header("Danger View")]
+	[Tooltip("Escape view, kind of a survival instinct(the more survival instinct, the lower angle. So it can escape without zigzags.)")]
+	[SerializeField] [MinMaxSlider(0, 360)] public Vector2 viewAngleDangerRNG;
 
 	[Header("Front View")]
 	[SerializeField] [MinMaxSlider(0, maxViewingDistance)] public Vector2 viewRadiusFrontRNG;
@@ -36,7 +41,7 @@ public class FieldOfView : MonoBehaviour
 	private void OnValidate()
 	{
 		viewAngleBack = 360 - viewAngleFront;
-		Initialize();
+		//Initialize();
 	}
 	#endif
 
@@ -48,11 +53,12 @@ public class FieldOfView : MonoBehaviour
 
 	private void Initialize()
 	{
-		viewAngleFront = UnityEngine.Random.Range(viewAngleFrontRNG.x, viewAngleFrontRNG.y);
+		viewAngleDanger = Random.Range(viewAngleDangerRNG.x, viewAngleDangerRNG.y);
+		viewAngleFront = Random.Range(viewAngleFrontRNG.x, viewAngleFrontRNG.y);
 		viewAngleBack = 360 - viewAngleFront;
 
-		viewRadiusFront = UnityEngine.Random.Range(viewRadiusFrontRNG.x, viewRadiusFrontRNG.y);
-		viewRadiusBack = UnityEngine.Random.Range(viewRadiusBackRNG.x, viewRadiusFront);
+		viewRadiusFront = Random.Range(viewRadiusFrontRNG.x, viewRadiusFrontRNG.y);
+		viewRadiusBack = Random.Range(viewRadiusBackRNG.x, viewRadiusFront);
 	}
 
 	private IEnumerator FindTargetsWithDelay(float delay) 

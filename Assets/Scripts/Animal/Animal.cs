@@ -12,6 +12,7 @@ using System;
 using UnityEngine.UI;
 using UnityEngine.AI;
 using UnityEngine.Events;
+using TMPro;
 
 public partial class Animal : MonoBehaviour
 {
@@ -29,6 +30,8 @@ public partial class Animal : MonoBehaviour
 	private const float criticalLimit = 25f;
 	private const float forgetDangerTime = 10f;
 	private const float targetNearThreshold = 1f;
+	private const float maxExploreTimer = 10f;
+	private const float maxExploreRadius = 20f;
 	private const string waterTag = "Water";
 	private float stamina;
 	private float charisma;
@@ -44,6 +47,8 @@ public partial class Animal : MonoBehaviour
 	private float _angularSpeed;
 	private float _acceleration;
 	private float _energyConsumeSpeed;
+	private float _exploreTimer;
+	private float _exploreRadius;
 	#endregion
 
 	#region Inspector Fields
@@ -52,9 +57,10 @@ public partial class Animal : MonoBehaviour
 	[Tooltip("Basic attributes which are randomly generated from range(RNG stands for range)")]
 	[SerializeField] private BasicAttributes basicAttributes;
 	[SerializeField] private AnimalStatsUI animalStatsUI;
-	[SerializeField] private FieldOfView fieldOfView;
 	[SerializeField] private new Collider collider;
 	[SerializeField] private NavMeshAgent navMeshAgent;
+	[SerializeField] private GameObject canvas;
+	[SerializeField] private GameObject child;
 	#endregion
 
 	public Priority currentPriority;
@@ -69,10 +75,6 @@ public partial class Animal : MonoBehaviour
 	private bool isReady = true;
 	private float readyTime1 = 5f;
 	private float readyTime2;
-
-	public float wanderTimer;
-	public float wanderRadius;
-	private float timer;
 
 	private void IsReady()
 	{
@@ -113,10 +115,27 @@ public partial class Animal : MonoBehaviour
 		firstPos = transform.position;
 		navMeshAgent.updateRotation = false;
 		ready += IsReady;
+		//TODO: koddan silip editorden yap.
+		canvas.SetActive(false);
 	}
-
+	private void OnMouseDown()
+	{
+		if (canvas.activeInHierarchy)
+		{
+			canvas.SetActive(false);
+		}
+		else
+		{
+			canvas.SetActive(true);
+		}
+	}
 	private void Update()
 	{
+		//TODO: delete before final build
+		if(Selection.activeGameObject == gameObject || Selection.activeGameObject == child)
+		{
+			canvas.SetActive(true);
+		}
 		//TODO: duzenle burayi
 		if(readyTime2 <= 0f)
 		{
@@ -139,6 +158,8 @@ public partial class Animal : MonoBehaviour
 		AngularSpeed = UnityEngine.Random.Range(basicAttributes.angularSpeedRNG.x, basicAttributes.angularSpeedRNG.y);
 		Acceleration = UnityEngine.Random.Range(basicAttributes.accelerationRNG.x, basicAttributes.accelerationRNG.y);
 		_energyConsumeSpeed = UnityEngine.Random.Range(basicAttributes.energyConsumeSpeedRNG.x, basicAttributes.energyConsumeSpeedRNG.y);
+		ExploreTimer = UnityEngine.Random.Range(basicAttributes.exploreTimerRNG.x, basicAttributes.exploreTimerRNG.y);
+		ExploreRadius = UnityEngine.Random.Range(basicAttributes.exploreRadiusRNG.x, basicAttributes.exploreRadiusRNG.y);
 
 		FillList(diet, dietList);
 		FillList(dangers, dangerList);
@@ -210,6 +231,8 @@ public partial class Animal : MonoBehaviour
 		if (currentPriority == Priority.Danger)
 		{
 			//timeLeftToForgetDanger = forgetDangerTime;
+			GameObject closestDanger = FindClosestDanger();
+			CalculateEscapeRoute(closestDanger);
 			//Escape();
 		}
 		else if (timeLeftToForgetDanger > 0f)
@@ -245,6 +268,12 @@ public partial class Animal : MonoBehaviour
 		}
 	}
 
+	private void CalculateEscapeRoute(GameObject closestDanger)
+	{
+		transform.forward = closestDanger.transform.position - transform.position;
+
+	}
+
 	#region Explore stuff
 	private Vector3 RandomNavSphere(Vector3 origin, float dist, LayerMask layerMask)
 	{
@@ -258,13 +287,15 @@ public partial class Animal : MonoBehaviour
 
 		return navHit.position;
 	}
+
+	private float timer;
 	private void Explore()
 	{
 		timer += Time.deltaTime;
 
-		if (timer >= wanderTimer)
+		if (timer >= ExploreTimer)
 		{
-			Vector3 newPos = RandomNavSphere(transform.position, wanderRadius, -1);
+			Vector3 newPos = RandomNavSphere(transform.position, ExploreRadius, -1);
 			navMeshAgent.SetDestination(newPos);
 			timer = 0;
 		}
@@ -363,11 +394,19 @@ public partial class Animal : MonoBehaviour
 	[System.Serializable]
 	private class AnimalStatsUI
 	{
+		[Header("Main Stats")]
 		[SerializeField] public Image foodSaturationBar;
 		[SerializeField] public Image waterSaturationBar;
-		[SerializeField] public Image reproductionUrgeBar;
+		[SerializeField] public Image reproductiveUrgeBar;
 		[SerializeField] public Image remainingLifeTimeBar;
 		[SerializeField] public Image energyBar;
+
+		[Header("Info Stats")]
+		[SerializeField] public TextMeshProUGUI moveSpeedText;
+		[SerializeField] public TextMeshProUGUI angularSpeedText;
+		[SerializeField] public TextMeshProUGUI accelerationText;
+		[SerializeField] public TextMeshProUGUI exploreTimerText;
+		[SerializeField] public TextMeshProUGUI exploreRadiusText;
 	}
 	[System.Serializable]
 	private class BasicAttributes
@@ -378,9 +417,13 @@ public partial class Animal : MonoBehaviour
 		[SerializeField] [MinMaxSlider(1, maxEnergy)] public Vector2 energyRNG;
 		[SerializeField] [MinMaxSlider(1, maxLifeTime)] public Vector2 remainingLifeTimeRNG;
 		[SerializeField] [MinMaxSlider(1, maxEnergyConsumeSpeed)] public Vector2 energyConsumeSpeedRNG;
+		[Header("Movement Stuff")]
 		[SerializeField] [MinMaxSlider(1, maxMoveSpeed)] public Vector2 moveSpeedRNG;
 		[SerializeField] [MinMaxSlider(1, maxAngularSpeed)] public Vector2 angularSpeedRNG;
 		[SerializeField] [MinMaxSlider(1, maxAcceleration)] public Vector2 accelerationRNG;
+		[Header("Randomly Explore Stuff")]
+		[SerializeField] [MinMaxSlider(1, maxExploreTimer)] public Vector2 exploreTimerRNG;
+		[SerializeField] [MinMaxSlider(1, maxExploreRadius)] public Vector2 exploreRadiusRNG;
 
 	}
 }

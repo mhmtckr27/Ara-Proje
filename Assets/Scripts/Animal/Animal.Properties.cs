@@ -3,6 +3,7 @@ Code by Hayri Cakir
 www.hayricakir.com
 */
 using UnityEngine;
+using UnityEngine.UI;
 
 public partial class Animal : MonoBehaviour
 {
@@ -14,6 +15,7 @@ public partial class Animal : MonoBehaviour
 		{
 			_foodSaturation = value;
 			animalStatsUI.foodSaturationBar.fillAmount = _foodSaturation / maxFoodSaturation;
+			AssignColorToBar(value, animalStatsUI.foodSaturationBar);
 		}
 	}
 	public float WaterSaturation
@@ -23,6 +25,7 @@ public partial class Animal : MonoBehaviour
 		{
 			_waterSaturation = value;
 			animalStatsUI.waterSaturationBar.fillAmount = WaterSaturation / maxWaterSaturation;
+			AssignColorToBar(value, animalStatsUI.waterSaturationBar);
 		}
 	}
 	public float ReproductiveUrge
@@ -31,7 +34,7 @@ public partial class Animal : MonoBehaviour
 		set
 		{
 			_reproductiveUrge = value;
-			animalStatsUI.reproductionUrgeBar.fillAmount = ReproductiveUrge / maxReproductiveUrge;
+			animalStatsUI.reproductiveUrgeBar.fillAmount = ReproductiveUrge / maxReproductiveUrge;
 		}
 	}
 	public float Energy
@@ -41,6 +44,7 @@ public partial class Animal : MonoBehaviour
 		{
 			_energy = value;
 			animalStatsUI.energyBar.fillAmount = Energy / maxEnergy;
+			AssignColorToBar(value, animalStatsUI.energyBar);
 		}
 	}
 	public float RemainingLifeTime
@@ -50,6 +54,7 @@ public partial class Animal : MonoBehaviour
 		{
 			_remainingLifeTime = value;
 			animalStatsUI.remainingLifeTimeBar.fillAmount = RemainingLifeTime / maxLifeTime;
+			AssignColorToBar(value, animalStatsUI.remainingLifeTimeBar);
 		}
 	}
 	public float MoveSpeed
@@ -58,6 +63,7 @@ public partial class Animal : MonoBehaviour
 		set
 		{
 			_moveSpeed = value;
+			animalStatsUI.moveSpeedText.text += (value.ToString("F1") + "/" + maxMoveSpeed);  
 			navMeshAgent.speed = value;
 		}
 	}
@@ -67,6 +73,7 @@ public partial class Animal : MonoBehaviour
 		set
 		{
 			_angularSpeed = value;
+			animalStatsUI.angularSpeedText.text += (value.ToString("F1") + "/" + maxAngularSpeed);
 			navMeshAgent.angularSpeed = value;
 		}
 	}
@@ -76,8 +83,39 @@ public partial class Animal : MonoBehaviour
 		set
 		{
 			_acceleration = value;
+			animalStatsUI.accelerationText.text += (value.ToString("F1") + "/" + maxAcceleration);
 			navMeshAgent.acceleration = value;
 		}
 	}
+	public float ExploreTimer 
+	{ 
+		get => _exploreTimer;
+		set
+		{
+			_exploreTimer = value;
+			animalStatsUI.exploreTimerText.text += (value.ToString("F1") + "/" + maxExploreTimer);
+		}
+	}
+	public float ExploreRadius 
+	{ 
+		get => _exploreRadius;
+		set
+		{
+			_exploreRadius = value;
+			animalStatsUI.exploreRadiusText.text += (value.ToString("F1") + "/" + maxExploreRadius);
+		}
+	}
 	#endregion
+
+	private void AssignColorToBar(float value, Image bar)
+	{
+		if (value > criticalLimit)
+		{
+			bar.color = Color.green;
+		}
+		else
+		{
+			bar.color = Color.red;
+		}
+	}
 }
