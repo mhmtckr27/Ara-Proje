@@ -2580,7 +2580,7 @@ MonoBehaviour:
   basicAttributes:
     foodSaturationRNG: {x: 0, y: 40}
     waterSaturationRNG: {x: 0, y: 40}
-    reproductiveUrgeRNG: {x: 0, y: 0}
+    reproductiveUrgeRNG: {x: 100, y: 100}
     energyRNG: {x: 1, y: 40}
     remainingLifeTimeRNG: {x: 60, y: 120}
     energyConsumeSpeedRNG: {x: 1, y: 20}
@@ -2589,6 +2589,7 @@ MonoBehaviour:
     accelerationRNG: {x: 1, y: 20}
     exploreTimerRNG: {x: 1, y: 10}
     exploreRadiusRNG: {x: 1, y: 20}
+    escapeRadiusRNG: {x: 1, y: 20}
   animalStatsUI:
     foodSaturationBar: {fileID: 1088408542}
     waterSaturationBar: {fileID: 556920677}
@@ -2604,7 +2605,8 @@ MonoBehaviour:
   navMeshAgent: {fileID: 5724165758501990333}
   canvas: {fileID: 2111282817}
   child: {fileID: 5724165758098602825}
-  currentPriority: 0
+  targetNearThreshold: 1
+  currentPriority: 5
 --- !u!1 &7281460860445901826
 GameObject:
   m_ObjectHideFlags: 0

@@ -29,7 +29,6 @@ public partial class Animal : MonoBehaviour
 	private const float restLimit = 90;//eğer tokluk ve suya doygunluk bu sınırın üstündeyse ve üreme dürtüsü de bunun altındaysa rest durumuna geçer.
 	private const float criticalLimit = 25f;
 	private const float forgetDangerTime = 10f;
-	private const float targetNearThreshold = 1f;
 	private const float maxExploreTimer = 10f;
 	private const float maxExploreRadius = 20f;
 	private const string waterTag = "Water";
@@ -61,6 +60,7 @@ public partial class Animal : MonoBehaviour
 	[SerializeField] private NavMeshAgent navMeshAgent;
 	[SerializeField] private GameObject canvas;
 	[SerializeField] private GameObject child;
+	[SerializeField] private float targetNearThreshold;
 	#endregion
 
 	public Priority currentPriority;
@@ -292,7 +292,7 @@ public partial class Animal : MonoBehaviour
 	private void Explore()
 	{
 		timer += Time.deltaTime;
-
+		animalStatsUI.exploreTimerText.text = "Explore timer: " +((ExploreTimer - timer).ToString("F1") + "/" + maxExploreTimer);
 		if (timer >= ExploreTimer)
 		{
 			Vector3 newPos = RandomNavSphere(transform.position, ExploreRadius, -1);
@@ -350,10 +350,11 @@ public partial class Animal : MonoBehaviour
 			return false;
 		}
 		navMeshAgent.SetDestination(foodFound.transform.position);
-
+		Debug.Log("first: " + ((foodFound.transform.position - transform.position).sqrMagnitude < targetNearThreshold) + "second:" + (navMeshAgent.remainingDistance < targetNearThreshold) + "third:" + isReady);
 		//TODO: buraları düzenle hardcodingi düzelt
 		if (TargetNear(foodFound) && isReady)
 		{
+			Debug.LogError("HAHA");
 			readyTime2 = readyTime1;
 			isReady = false;
 			objectsDictionary.Remove(foodFound.tag);
@@ -388,7 +389,7 @@ public partial class Animal : MonoBehaviour
 		return closestDanger;
 	}
 	//TODO: calismiyor, daha iyi bir yol bul 
-	private bool TargetNear(GameObject target) => (target.transform.position - transform.position).sqrMagnitude < targetNearThreshold && navMeshAgent.remainingDistance < targetNearThreshold;
+	private bool TargetNear(GameObject target) => (target.transform.position - transform.position).sqrMagnitude < targetNearThreshold && navMeshAgent.remainingDistance < targetNearThreshold * 2;
 	//private void OnDrawGizmos() => Gizmos.DrawWireSphere(transform.position, fieldOfView.viewRadiusFront);
 
 	[System.Serializable]
@@ -424,6 +425,8 @@ public partial class Animal : MonoBehaviour
 		[Header("Randomly Explore Stuff")]
 		[SerializeField] [MinMaxSlider(1, maxExploreTimer)] public Vector2 exploreTimerRNG;
 		[SerializeField] [MinMaxSlider(1, maxExploreRadius)] public Vector2 exploreRadiusRNG;
+		[Header("Danger Stuff")]
+		[SerializeField] [MinMaxSlider(1, maxExploreRadius)] public Vector2 escapeRadiusRNG;
 
 	}
 }

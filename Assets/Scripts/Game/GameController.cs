@@ -2,6 +2,7 @@
 Code by Hayri Cakir
 www.hayricakir.com
 */
+using System.Collections.Generic;
 using UnityEngine;
 
 public class GameController : MonoBehaviour
@@ -12,6 +13,7 @@ public class GameController : MonoBehaviour
     [SerializeField] private LayerMask groundLayer;
     [SerializeField] private LayerMask waterLayer;
     [SerializeField] private GameObject emptyObject;
+    List<GameObject> rabbits = new List<GameObject>();
     void Start()
     {
         //for(int i = 0; i < 500; i++)
@@ -42,30 +44,31 @@ public class GameController : MonoBehaviour
             if (Physics.Raycast(new Vector3(x, -1, z), Vector3.down, out hit, Mathf.Infinity, groundLayer) && hit.distance < 19)
             {
                 Instantiate(bunny, hit.point + Vector3.up * 0.25f, Quaternion.identity);
+                rabbits.Add(bunny);
             }
         }
-        ////for(int i = 0; i < 100; i++)
-        ////{
-        ////    float x = Random.Range(200, 320);
-        ////    float z = Random.Range(200, 320);
-
-        ////    RaycastHit hit;
-        ////    if (Physics.Raycast(new Vector3(x, -1, z), Vector3.down, out hit, groundLayer))
-        ////    {
-        ////        Instantiate(fox, hit.point + Vector3.up * 0.25f, Quaternion.identity);
-        ////    }
-        ////}        
-        for (int i = 0; i < 125; i++)
+        for (int i = 0; i < 100; i++)
         {
-            float x = Random.Range(150, 350);
-            float z = Random.Range(150, 350);
+            float x = Random.Range(200, 320);
+            float z = Random.Range(200, 320);
 
             RaycastHit hit;
-            if (Physics.Raycast(new Vector3(x, -1, z), Vector3.down, out hit, Mathf.Infinity, groundLayer) && hit.distance < 19)
+            if (Physics.Raycast(new Vector3(x, -1, z), Vector3.down, out hit, groundLayer))
             {
-                Instantiate(grass, hit.point + Vector3.down * .05f, Quaternion.identity).transform.up = hit.normal;
+                Instantiate(fox, hit.point + Vector3.up * .5f, Quaternion.identity);
             }
         }
+        //for (int i = 0; i < 125; i++)
+        //{
+        //    float x = Random.Range(150, 350);
+        //    float z = Random.Range(150, 350);
+
+        //    RaycastHit hit;
+        //    if (Physics.Raycast(new Vector3(x, -1, z), Vector3.down, out hit, Mathf.Infinity, groundLayer) && hit.distance < 19)
+        //    {
+        //        Instantiate(grass, hit.point + Vector3.down * .05f, Quaternion.identity).transform.up = hit.normal;
+        //    }
+        //}
         //for(int i = 0; i < 100; i++)
         //{
         //    float x = Random.Range(0, 501);
@@ -77,6 +80,6 @@ public class GameController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        
+        Debug.Log(rabbits.Count);
     }
 }

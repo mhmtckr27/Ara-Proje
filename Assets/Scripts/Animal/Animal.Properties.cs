@@ -93,7 +93,7 @@ public partial class Animal : MonoBehaviour
 		set
 		{
 			_exploreTimer = value;
-			animalStatsUI.exploreTimerText.text += (value.ToString("F1") + "/" + maxExploreTimer);
+			//animalStatsUI.exploreTimerText.text += (value.ToString("F1") + "/" + maxExploreTimer);
 		}
 	}
 	public float ExploreRadius 
