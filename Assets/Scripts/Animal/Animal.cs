@@ -30,7 +30,9 @@ public partial class Animal : MonoBehaviour
 	private const float criticalLimit = 25f;
 	private const float forgetDangerTime = 10f;
 	private const float maxExploreTimer = 10f;
+	private const float maxEscapeTimer = 10f;
 	private const float maxExploreRadius = 20f;
+	private const float maxEscapeRadius = 20f;
 	private const string waterTag = "Water";
 	private float stamina;
 	private float charisma;
@@ -48,6 +50,8 @@ public partial class Animal : MonoBehaviour
 	private float _energyConsumeSpeed;
 	private float _exploreTimer;
 	private float _exploreRadius;
+	private float _escapeTimer;
+	private float _escapeRadius;
 	#endregion
 
 	#region Inspector Fields
@@ -61,6 +65,7 @@ public partial class Animal : MonoBehaviour
 	[SerializeField] private GameObject canvas;
 	[SerializeField] private GameObject child;
 	[SerializeField] private float targetNearThreshold;
+	[SerializeField] private FieldOfView fieldOfView;
 	#endregion
 
 	public Priority currentPriority;
@@ -160,6 +165,8 @@ public partial class Animal : MonoBehaviour
 		_energyConsumeSpeed = UnityEngine.Random.Range(basicAttributes.energyConsumeSpeedRNG.x, basicAttributes.energyConsumeSpeedRNG.y);
 		ExploreTimer = UnityEngine.Random.Range(basicAttributes.exploreTimerRNG.x, basicAttributes.exploreTimerRNG.y);
 		ExploreRadius = UnityEngine.Random.Range(basicAttributes.exploreRadiusRNG.x, basicAttributes.exploreRadiusRNG.y);
+		EscapeRadius = UnityEngine.Random.Range(basicAttributes.escapeRadiusRNG.x, basicAttributes.escapeRadiusRNG.y);
+		EscapeTimer = UnityEngine.Random.Range(basicAttributes.escapeTimerRNG.x, basicAttributes.escapeTimerRNG.y);
 
 		FillList(diet, dietList);
 		FillList(dangers, dangerList);
@@ -231,8 +238,12 @@ public partial class Animal : MonoBehaviour
 		if (currentPriority == Priority.Danger)
 		{
 			//timeLeftToForgetDanger = forgetDangerTime;
+			//TODO: timer koy.
 			GameObject closestDanger = FindClosestDanger();
-			CalculateEscapeRoute(closestDanger);
+			if(closestDanger != null)
+			{
+				Escape(closestDanger);
+			}
 			//Escape();
 		}
 		else if (timeLeftToForgetDanger > 0f)
@@ -268,11 +279,57 @@ public partial class Animal : MonoBehaviour
 		}
 	}
 
-	private void CalculateEscapeRoute(GameObject closestDanger)
+	#region Escape Stuff
+	private Vector3 CalculateEscapeRoute(GameObject closestDanger)
 	{
-		transform.forward = closestDanger.transform.position - transform.position;
+		transform.forward = transform.position - closestDanger.transform.position;
+		Vector3 escapePosition = UnityEngine.Random.insideUnitSphere * (EscapeRadius * Mathf.Tan(fieldOfView.viewAngleDanger));
 
+		escapePosition += transform.position;
+		escapePosition += transform.forward * EscapeRadius;
+
+		NavMeshHit navHit;
+
+		NavMesh.SamplePosition(escapePosition, out navHit, EscapeRadius, -1);
+
+		Debug.DrawLine(transform.position, escapePosition);
+		return navHit.position;
 	}
+
+	private float timeLeftToEscape;
+	private void Escape(GameObject closestDanger)
+	{
+		timeLeftToEscape += Time.deltaTime;
+		Debug.Log(timeLeftToEscape + "   " + EscapeTimer);
+		if(timeLeftToEscape >= EscapeTimer)
+		{
+			Vector3 escapePosition = CalculateEscapeRoute(closestDanger);
+			navMeshAgent.SetDestination(escapePosition);
+			timeLeftToEscape = 0;
+		}
+	}
+	private GameObject FindClosestDanger()
+	{
+		float closestDistance = Mathf.Infinity;
+		float currentDistance;
+		GameObject closestDanger = null;
+		GameObject currentDanger;
+		//TODO: IJobParallelFor kullanabilirsen kullan bu ve diğer for'lar için.
+		foreach (string danger in dangerList)
+		{
+			if (objectsDictionary.TryGetValue(danger, out currentDanger))
+			{
+				currentDistance = Vector3.Distance(gameObject.transform.position, currentDanger.transform.position);
+				if (currentDistance < closestDistance)
+				{
+					closestDistance = currentDistance;
+					closestDanger = currentDanger;
+				}
+			}
+		}
+		return closestDanger;
+	}
+	#endregion
 
 	#region Explore stuff
 	private Vector3 RandomNavSphere(Vector3 origin, float dist, LayerMask layerMask)
@@ -288,16 +345,17 @@ public partial class Animal : MonoBehaviour
 		return navHit.position;
 	}
 
-	private float timer;
+	private float timeLeftToExplore;
+
 	private void Explore()
 	{
-		timer += Time.deltaTime;
-		animalStatsUI.exploreTimerText.text = "Explore timer: " +((ExploreTimer - timer).ToString("F1") + "/" + maxExploreTimer);
-		if (timer >= ExploreTimer)
+		timeLeftToExplore += Time.deltaTime;
+		animalStatsUI.exploreTimerText.text = "Explore timer: " +((ExploreTimer - timeLeftToExplore).ToString("F1") + "/" + maxExploreTimer);
+		if (timeLeftToExplore >= ExploreTimer)
 		{
 			Vector3 newPos = RandomNavSphere(transform.position, ExploreRadius, -1);
 			navMeshAgent.SetDestination(newPos);
-			timer = 0;
+			timeLeftToExplore = 0;
 		}
 	}
 	#endregion
@@ -350,11 +408,11 @@ public partial class Animal : MonoBehaviour
 			return false;
 		}
 		navMeshAgent.SetDestination(foodFound.transform.position);
-		Debug.Log("first: " + ((foodFound.transform.position - transform.position).sqrMagnitude < targetNearThreshold) + "second:" + (navMeshAgent.remainingDistance < targetNearThreshold) + "third:" + isReady);
+		//Debug.Log("first: " + ((foodFound.transform.position - transform.position).sqrMagnitude < targetNearThreshold) + "second:" + (navMeshAgent.remainingDistance < targetNearThreshold) + "third:" + isReady);
 		//TODO: buraları düzenle hardcodingi düzelt
 		if (TargetNear(foodFound) && isReady)
 		{
-			Debug.LogError("HAHA");
+			//Debug.LogError("HAHA");
 			readyTime2 = readyTime1;
 			isReady = false;
 			objectsDictionary.Remove(foodFound.tag);
@@ -367,29 +425,8 @@ public partial class Animal : MonoBehaviour
 	}
 	#endregion
 
-	private GameObject FindClosestDanger()
-	{
-		float closestDistance = Mathf.Infinity;
-		float currentDistance;
-		GameObject closestDanger = null;
-		GameObject currentDanger;
-		//TODO: IJobParallelFor kullanabilirsen kullan bu ve diğer for'lar için.
-		foreach (string danger in dangerList)
-		{
-			if (objectsDictionary.TryGetValue(danger, out currentDanger))
-			{
-				currentDistance = Vector3.Distance(gameObject.transform.position, currentDanger.transform.position);
-				if (currentDistance < closestDistance)
-				{
-					closestDistance = currentDistance;
-					closestDanger = currentDanger;
-				}
-			}
-		}
-		return closestDanger;
-	}
 	//TODO: calismiyor, daha iyi bir yol bul 
-	private bool TargetNear(GameObject target) => (target.transform.position - transform.position).sqrMagnitude < targetNearThreshold && navMeshAgent.remainingDistance < targetNearThreshold * 2;
+	private bool TargetNear(GameObject target) => (target.transform.position - transform.position).sqrMagnitude < targetNearThreshold && navMeshAgent.remainingDistance < targetNearThreshold * 1.5f;
 	//private void OnDrawGizmos() => Gizmos.DrawWireSphere(transform.position, fieldOfView.viewRadiusFront);
 
 	[System.Serializable]
@@ -426,7 +463,8 @@ public partial class Animal : MonoBehaviour
 		[SerializeField] [MinMaxSlider(1, maxExploreTimer)] public Vector2 exploreTimerRNG;
 		[SerializeField] [MinMaxSlider(1, maxExploreRadius)] public Vector2 exploreRadiusRNG;
 		[Header("Danger Stuff")]
-		[SerializeField] [MinMaxSlider(1, maxExploreRadius)] public Vector2 escapeRadiusRNG;
+		[SerializeField] [MinMaxSlider(0, maxEscapeTimer)] public Vector2 escapeTimerRNG;
+		[SerializeField] [MinMaxSlider(1, maxEscapeRadius)] public Vector2 escapeRadiusRNG;
 
 	}
 }

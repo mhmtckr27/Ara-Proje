@@ -28,7 +28,8 @@ public class Rotator : MonoBehaviour
         RaycastHit hit;
         if (Physics.Raycast(new Vector3(transform.position.x, transform.position.y + 2, transform.position.z), -Vector3.up, out hit, 3, mask))
         {
-            transform.rotation = Quaternion.LookRotation(parentAgent.velocity != Vector3.zero ? parentAgent.velocity : transform.forward, hit.normal);
+            Quaternion lookRotation = Quaternion.LookRotation(parentAgent.velocity != Vector3.zero ? parentAgent.velocity : transform.forward, hit.normal);
+            transform.rotation = Quaternion.Slerp(transform.rotation, lookRotation, .75f);
         }
 
     }

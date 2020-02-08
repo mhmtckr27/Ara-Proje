@@ -105,6 +105,10 @@ public partial class Animal : MonoBehaviour
 			animalStatsUI.exploreRadiusText.text += (value.ToString("F1") + "/" + maxExploreRadius);
 		}
 	}
+	public float EscapeRadius { get => _escapeRadius; set => _escapeRadius = value; }
+	public float EscapeTimer { get => _escapeTimer; set => _escapeTimer = value; }
+
+
 	#endregion
 
 	private void AssignColorToBar(float value, Image bar)
