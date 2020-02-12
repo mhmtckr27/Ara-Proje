@@ -15,7 +15,7 @@ public class FieldOfView : MonoBehaviour
 
 	[Header("Parent Related Stuff")]
 	[SerializeField] public Animal animalScript;
-	[SerializeField] private Collider parentCollider;
+	[SerializeField] private new Collider collider;
 
 	[Header("Danger View")]
 	[Tooltip("Escape view, kind of a survival instinct(the more survival instinct, the lower angle. So it can escape without zigzags.)")]
@@ -75,7 +75,7 @@ public class FieldOfView : MonoBehaviour
 	{
 		animalScript.objectsDictionary.Clear();
 		List<Collider> targetsInViewRadius = ScanFieldOfView.ToList();
-		targetsInViewRadius.Remove(parentCollider);
+		targetsInViewRadius.Remove(collider);
 
 		for (int i = 0; i < targetsInViewRadius.Count; i++)
 		{

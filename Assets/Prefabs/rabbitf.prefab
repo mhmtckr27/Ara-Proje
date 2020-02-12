@@ -2582,14 +2582,15 @@ MonoBehaviour:
     waterSaturationRNG: {x: 0, y: 40}
     reproductiveUrgeRNG: {x: 100, y: 100}
     energyRNG: {x: 1, y: 40}
-    remainingLifeTimeRNG: {x: 60, y: 120}
+    lifeTimeRNG: {x: 60, y: 120}
     energyConsumeSpeedRNG: {x: 1, y: 20}
+    baseCharisma: 0
     moveSpeedRNG: {x: 1, y: 20}
     angularSpeedRNG: {x: 1, y: 360}
     accelerationRNG: {x: 1, y: 20}
     exploreTimerRNG: {x: 4, y: 4}
     exploreRadiusRNG: {x: 10, y: 20}
-    escapeTimerRNG: {x: 0.5, y: 1}
+    escapeTimerRNG: {x: 0.5, y: 0.5}
     escapeRadiusRNG: {x: 5, y: 20}
   animalStatsUI:
     foodSaturationBar: {fileID: 1088408542}

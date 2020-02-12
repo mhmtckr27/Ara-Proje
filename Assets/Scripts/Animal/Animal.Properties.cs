@@ -47,16 +47,26 @@ public partial class Animal : MonoBehaviour
 			AssignColorToBar(value, animalStatsUI.energyBar);
 		}
 	}
-	public float RemainingLifeTime
+	public float LifeTime
 	{
-		get => _remainingLifeTime;
+		get => _lifeTime;
 		set
 		{
-			_remainingLifeTime = value;
-			animalStatsUI.remainingLifeTimeBar.fillAmount = RemainingLifeTime / maxLifeTime;
-			AssignColorToBar(value, animalStatsUI.remainingLifeTimeBar);
+			_lifeTime = value;
 		}
 	}
+	
+	public float CurrentLifeTime 
+	{ 
+		get => _currentLifeTime;
+		set
+		{
+			_currentLifeTime = value;
+			animalStatsUI.remainingLifeTimeBar.fillAmount = 1 - value / LifeTime;
+			//AssignColorToBar(value, animalStatsUI.remainingLifeTimeBar);
+		}
+	}
+
 	public float MoveSpeed
 	{
 		get => _moveSpeed;
@@ -103,6 +113,14 @@ public partial class Animal : MonoBehaviour
 		{
 			_exploreRadius = value;
 			animalStatsUI.exploreRadiusText.text += (value.ToString("F1") + "/" + maxExploreRadius);
+		}
+	}
+	public float Charisma 
+	{ 
+		get => _charisma;
+		set
+		{
+			_charisma = value;
 		}
 	}
 	public float EscapeRadius { get => _escapeRadius; set => _escapeRadius = value; }

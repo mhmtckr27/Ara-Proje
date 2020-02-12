@@ -14,7 +14,7 @@ using UnityEngine.AI;
 using UnityEngine.Events;
 using TMPro;
 
-public partial class Animal : MonoBehaviour
+public partial class Animal : MonoBehaviour, IReproducible
 {
 	#region Constant Variable Declarations
 	private const float maxLifeTime = 120f; //1 year = 60 sec.
@@ -34,8 +34,6 @@ public partial class Animal : MonoBehaviour
 	private const float maxExploreRadius = 20f;
 	private const float maxEscapeRadius = 20f;
 	private const string waterTag = "Water";
-	private float stamina;
-	private float charisma;
 	#endregion
 
 	#region Basic Animal Attributes
@@ -43,7 +41,8 @@ public partial class Animal : MonoBehaviour
 	private float _waterSaturation;//suya doygunluk
 	private float _reproductiveUrge;//suya doygunluk
 	private float _energy;
-	private float _remainingLifeTime;
+	private float _lifeTime;
+	private float _currentLifeTime;
 	private float _moveSpeed;
 	private float _angularSpeed;
 	private float _acceleration;
@@ -52,6 +51,8 @@ public partial class Animal : MonoBehaviour
 	private float _exploreRadius;
 	private float _escapeTimer;
 	private float _escapeRadius;
+	private float _charisma;
+	private float stamina;
 	#endregion
 
 	#region Inspector Fields
@@ -60,7 +61,6 @@ public partial class Animal : MonoBehaviour
 	[Tooltip("Basic attributes which are randomly generated from range(RNG stands for range)")]
 	[SerializeField] private BasicAttributes basicAttributes;
 	[SerializeField] private AnimalStatsUI animalStatsUI;
-	[SerializeField] private new Collider collider;
 	[SerializeField] private NavMeshAgent navMeshAgent;
 	[SerializeField] private GameObject canvas;
 	[SerializeField] private GameObject child;
@@ -157,14 +157,20 @@ public partial class Animal : MonoBehaviour
 		FoodSaturation = UnityEngine.Random.Range(basicAttributes.foodSaturationRNG.x, basicAttributes.foodSaturationRNG.y);
 		WaterSaturation = UnityEngine.Random.Range(basicAttributes.waterSaturationRNG.x, basicAttributes.waterSaturationRNG.y);
 		ReproductiveUrge = UnityEngine.Random.Range(basicAttributes.reproductiveUrgeRNG.x, basicAttributes.reproductiveUrgeRNG.y);
+		
 		Energy = UnityEngine.Random.Range(basicAttributes.energyRNG.x, basicAttributes.energyRNG.y);
-		RemainingLifeTime = UnityEngine.Random.Range(basicAttributes.remainingLifeTimeRNG.x, basicAttributes.remainingLifeTimeRNG.y);
+		_energyConsumeSpeed = UnityEngine.Random.Range(basicAttributes.energyConsumeSpeedRNG.x, basicAttributes.energyConsumeSpeedRNG.y);
+		LifeTime = UnityEngine.Random.Range(basicAttributes.lifeTimeRNG.x, basicAttributes.lifeTimeRNG.y);
+
+		Charisma = basicAttributes.baseCharisma;
+
 		MoveSpeed = UnityEngine.Random.Range(basicAttributes.moveSpeedRNG.x, basicAttributes.moveSpeedRNG.y);
 		AngularSpeed = UnityEngine.Random.Range(basicAttributes.angularSpeedRNG.x, basicAttributes.angularSpeedRNG.y);
 		Acceleration = UnityEngine.Random.Range(basicAttributes.accelerationRNG.x, basicAttributes.accelerationRNG.y);
-		_energyConsumeSpeed = UnityEngine.Random.Range(basicAttributes.energyConsumeSpeedRNG.x, basicAttributes.energyConsumeSpeedRNG.y);
+
 		ExploreTimer = UnityEngine.Random.Range(basicAttributes.exploreTimerRNG.x, basicAttributes.exploreTimerRNG.y);
 		ExploreRadius = UnityEngine.Random.Range(basicAttributes.exploreRadiusRNG.x, basicAttributes.exploreRadiusRNG.y);
+		
 		EscapeRadius = UnityEngine.Random.Range(basicAttributes.escapeRadiusRNG.x, basicAttributes.escapeRadiusRNG.y);
 		EscapeTimer = UnityEngine.Random.Range(basicAttributes.escapeTimerRNG.x, basicAttributes.escapeTimerRNG.y);
 
@@ -177,8 +183,8 @@ public partial class Animal : MonoBehaviour
 		lastPos = transform.position;
 		//energy -= Vector3.Distance(lastPos, firstPos) * energyConsumeSpeed * Time.deltaTime;
 		firstPos = lastPos;
-		RemainingLifeTime -= Time.deltaTime;
-		if (RemainingLifeTime <= 0)
+		CurrentLifeTime += Time.deltaTime;
+		if (CurrentLifeTime > LifeTime)
 		{
 			Die(CauseOfDeath.OldAge);
 		}
@@ -300,7 +306,7 @@ public partial class Animal : MonoBehaviour
 	private void Escape(GameObject closestDanger)
 	{
 		timeLeftToEscape += Time.deltaTime;
-		Debug.Log(timeLeftToEscape + "   " + EscapeTimer);
+		//Debug.Log(timeLeftToEscape + "   " + EscapeTimer);
 		if(timeLeftToEscape >= EscapeTimer)
 		{
 			Vector3 escapePosition = CalculateEscapeRoute(closestDanger);
@@ -346,6 +352,7 @@ public partial class Animal : MonoBehaviour
 	}
 
 	private float timeLeftToExplore;
+
 
 	private void Explore()
 	{
@@ -425,8 +432,32 @@ public partial class Animal : MonoBehaviour
 	}
 	#endregion
 
+	#region Mating Stuff
+	public virtual GameObject FindPotentialMate()
+	{
+		throw new NotImplementedException();
+	}
+
+	public void RequestMating()
+	{
+		throw new NotImplementedException();
+	}
+
+	public bool IsAttracted()
+	{
+		throw new NotImplementedException();
+	}
+
+	public void Mate()
+	{
+		throw new NotImplementedException();
+	}
+	#endregion
+
 	//TODO: calismiyor, daha iyi bir yol bul 
 	private bool TargetNear(GameObject target) => (target.transform.position - transform.position).sqrMagnitude < targetNearThreshold && navMeshAgent.remainingDistance < targetNearThreshold * 1.5f;
+
+
 	//private void OnDrawGizmos() => Gizmos.DrawWireSphere(transform.position, fieldOfView.viewRadiusFront);
 
 	[System.Serializable]
@@ -453,8 +484,9 @@ public partial class Animal : MonoBehaviour
 		[SerializeField] [MinMaxSlider(0, maxWaterSaturation)] public Vector2 waterSaturationRNG;
 		[SerializeField] [MinMaxSlider(0, maxReproductiveUrge)] public Vector2 reproductiveUrgeRNG;
 		[SerializeField] [MinMaxSlider(1, maxEnergy)] public Vector2 energyRNG;
-		[SerializeField] [MinMaxSlider(1, maxLifeTime)] public Vector2 remainingLifeTimeRNG;
+		[SerializeField] [MinMaxSlider(1, maxLifeTime)] public Vector2 lifeTimeRNG;
 		[SerializeField] [MinMaxSlider(1, maxEnergyConsumeSpeed)] public Vector2 energyConsumeSpeedRNG;
+		[SerializeField] public float baseCharisma;
 		[Header("Movement Stuff")]
 		[SerializeField] [MinMaxSlider(1, maxMoveSpeed)] public Vector2 moveSpeedRNG;
 		[SerializeField] [MinMaxSlider(1, maxAngularSpeed)] public Vector2 angularSpeedRNG;
