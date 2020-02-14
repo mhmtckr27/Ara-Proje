@@ -13,6 +13,7 @@ using UnityEngine.UI;
 using UnityEngine.AI;
 using UnityEngine.Events;
 using TMPro;
+using com.hayricakir;
 
 public partial class Animal : MonoBehaviour, IReproducible
 {
@@ -42,7 +43,6 @@ public partial class Animal : MonoBehaviour, IReproducible
 	private float _reproductiveUrge;//suya doygunluk
 	private float _energy;
 	private float _lifeTime;
-	private float _currentLifeTime;
 	private float _moveSpeed;
 	private float _angularSpeed;
 	private float _acceleration;
@@ -53,6 +53,9 @@ public partial class Animal : MonoBehaviour, IReproducible
 	private float _escapeRadius;
 	private float _charisma;
 	private float stamina;
+	private DateTime currentLifeTimeDateTime;
+	private float currentAge;
+	private DateTime bornDate;
 	#endregion
 
 	#region Inspector Fields
@@ -80,6 +83,16 @@ public partial class Animal : MonoBehaviour, IReproducible
 	private bool isReady = true;
 	private float readyTime1 = 5f;
 	private float readyTime2;
+
+	public struct LifeTime
+	{
+		public int second;
+		public int minute;
+		public int hour;
+		public int day;
+		public int month;
+		public int year;
+	}
 
 	private void IsReady()
 	{
@@ -113,10 +126,12 @@ public partial class Animal : MonoBehaviour, IReproducible
 		}
 	}
 	#endregion
+
 	private void Start()
 	{
 		//TODO: call initialize from here.
 		Initialize();
+		StartCoroutine(UpdateLifeTimeCoroutine());
 		firstPos = transform.position;
 		navMeshAgent.updateRotation = false;
 		ready += IsReady;
@@ -150,17 +165,21 @@ public partial class Animal : MonoBehaviour, IReproducible
 		ChooseAction();
 		Consume();
 		readyTime2 -= Time.deltaTime;
+		Debug.Log((float)currentAge);
 	}
+
 
 	public void Initialize()
 	{
+		bornDate = Calendar.CurrentDateTime;
+
 		FoodSaturation = UnityEngine.Random.Range(basicAttributes.foodSaturationRNG.x, basicAttributes.foodSaturationRNG.y);
 		WaterSaturation = UnityEngine.Random.Range(basicAttributes.waterSaturationRNG.x, basicAttributes.waterSaturationRNG.y);
 		ReproductiveUrge = UnityEngine.Random.Range(basicAttributes.reproductiveUrgeRNG.x, basicAttributes.reproductiveUrgeRNG.y);
 		
 		Energy = UnityEngine.Random.Range(basicAttributes.energyRNG.x, basicAttributes.energyRNG.y);
 		_energyConsumeSpeed = UnityEngine.Random.Range(basicAttributes.energyConsumeSpeedRNG.x, basicAttributes.energyConsumeSpeedRNG.y);
-		LifeTime = UnityEngine.Random.Range(basicAttributes.lifeTimeRNG.x, basicAttributes.lifeTimeRNG.y);
+		_lifeTime = UnityEngine.Random.Range(basicAttributes.lifeTimeRNG.x, basicAttributes.lifeTimeRNG.y);
 
 		Charisma = basicAttributes.baseCharisma;
 
@@ -177,17 +196,18 @@ public partial class Animal : MonoBehaviour, IReproducible
 		FillList(diet, dietList);
 		FillList(dangers, dangerList);
 	}
+
 	private void Consume()
 	{
 		//TODO: bunu da bişeylere bağla işte bu kadar sade olmasın xd
 		lastPos = transform.position;
 		//energy -= Vector3.Distance(lastPos, firstPos) * energyConsumeSpeed * Time.deltaTime;
 		firstPos = lastPos;
-		CurrentLifeTime += Time.deltaTime;
-		if (CurrentLifeTime > LifeTime)
-		{
-			Die(CauseOfDeath.OldAge);
-		}
+		//TODO: eceli geldiyse ölsün.
+		//if (CurrentLifeTime > LifeTime)
+		//{
+		//	Die(CauseOfDeath.OldAge);
+		//}
 	}
 	private void Die(CauseOfDeath causeOfDeath)
 	{
@@ -457,6 +477,42 @@ public partial class Animal : MonoBehaviour, IReproducible
 	//TODO: calismiyor, daha iyi bir yol bul 
 	private bool TargetNear(GameObject target) => (target.transform.position - transform.position).sqrMagnitude < targetNearThreshold && navMeshAgent.remainingDistance < targetNearThreshold * 1.5f;
 
+	public IEnumerator UpdateLifeTimeCoroutine()
+	{
+		while (true)
+		{
+			yield return new WaitForSeconds(GameController.Instance.animalAgeUpdatePeriod);
+			UpdateLifeTime(GameController.Instance.timeFlowRate.timeFlowRate);
+		}
+	}
+
+	private void UpdateLifeTime(float amountToAdd)
+	{
+		switch (GameController.Instance.timeFlowRate.timeType)
+		{
+			case GameController.TimeType.Second:
+				currentLifeTimeDateTime = currentLifeTimeDateTime.AddSeconds(amountToAdd);
+				break;
+			case GameController.TimeType.Minute:
+				currentLifeTimeDateTime = currentLifeTimeDateTime.AddMinutes(amountToAdd);
+				break;
+			case GameController.TimeType.Hour:
+				currentLifeTimeDateTime = currentLifeTimeDateTime.AddHours(amountToAdd);
+				break;
+			case GameController.TimeType.Day:
+				currentLifeTimeDateTime = currentLifeTimeDateTime.AddDays(amountToAdd);
+				break;
+			case GameController.TimeType.Month:
+				currentLifeTimeDateTime = currentLifeTimeDateTime.AddMonths((int)amountToAdd);
+				break;
+			case GameController.TimeType.Year:
+				currentLifeTimeDateTime = currentLifeTimeDateTime.AddYears((int)amountToAdd);
+				break;
+		}
+
+		TimeSpan temp = Calendar.GetDifference(bornDate, Calendar.CurrentDateTime);
+		currentAge = (float) temp.TotalDays / 365;
+	}
 
 	//private void OnDrawGizmos() => Gizmos.DrawWireSphere(transform.position, fieldOfView.viewRadiusFront);
 

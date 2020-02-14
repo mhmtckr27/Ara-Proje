@@ -2,10 +2,11 @@
 Code by Hayri Cakir
 www.hayricakir.com
 */
+using System;
 using UnityEngine;
 using UnityEngine.UI;
 
-public partial class Animal : MonoBehaviour
+public partial class Animal
 {
 	#region Basic Animal Attributes Properties
 	public float FoodSaturation
@@ -47,26 +48,6 @@ public partial class Animal : MonoBehaviour
 			AssignColorToBar(value, animalStatsUI.energyBar);
 		}
 	}
-	public float LifeTime
-	{
-		get => _lifeTime;
-		set
-		{
-			_lifeTime = value;
-		}
-	}
-	
-	public float CurrentLifeTime 
-	{ 
-		get => _currentLifeTime;
-		set
-		{
-			_currentLifeTime = value;
-			animalStatsUI.remainingLifeTimeBar.fillAmount = 1 - value / LifeTime;
-			//AssignColorToBar(value, animalStatsUI.remainingLifeTimeBar);
-		}
-	}
-
 	public float MoveSpeed
 	{
 		get => _moveSpeed;
