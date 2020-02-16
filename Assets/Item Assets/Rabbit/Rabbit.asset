@@ -12,14 +12,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 12199eb313ed4c747a966929be8af19b, type: 3}
   m_Name: Rabbit
   m_EditorClassIdentifier: 
-  energyValue: 13.050001
-  nutritionValue: 1.05
+  energyValue: 712.30005
+  nutritionValue: 258.4
+  moistureValue: 87.33751
   sprite: {fileID: 21300000, guid: 8c44d51ada0541945b8d789ef824f1de, type: 3}
-  fatPercentage: 0.1
-  proteinPercentage: 0.3
-  carbohydratePercentage: 0.6
-  weightInKg: 3
-  baseThirstinessValue: 5
-  thirstinessValue: 8.900001
+  fatPercentage: 0.092
+  proteinPercentage: 0.212
+  carbohydratePercentage: 0
+  moisturePercentage: 0.685
+  weightInKg: 1
   reproductiveUrgeIncrementValue: 5
-  eatablePercentage: 0.35
+  ediblePercentage: 0.85
+  edibleWeight: 850

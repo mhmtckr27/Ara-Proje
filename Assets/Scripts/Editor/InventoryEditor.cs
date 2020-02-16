@@ -20,30 +20,31 @@ public class InventoryEditor : Editor
     }
     public override void OnInspectorGUI()
     {
-        serializedObject.Update();
-        for (int i = 0; i < Inventory.numItemSlots; i++)
-        {
-            ItemSlotGUI(i);
-        }
-        serializedObject.ApplyModifiedProperties(); 
+        //serializedObject.Update();
+        //for (int i = 0; i < Inventory.numItemSlots; i++)
+        //{
+        //    ItemSlotGUI(i);
+        //}
+        //serializedObject.ApplyModifiedProperties(); 
         //TODO: delete after test
+        base.OnInspectorGUI();
         if (GUILayout.Button("Stock Rabbit"))
         {
             FindObjectOfType<RedFox>().inventory.AddItem(FindObjectOfType<RedFox>().rabbitItem);
         }
     }
-    private void ItemSlotGUI(int index)
-    {
-        EditorGUILayout.BeginVertical(GUI.skin.box);
-        EditorGUI.indentLevel++;
+    //private void ItemSlotGUI(int index)
+    //{
+    //    EditorGUILayout.BeginVertical(GUI.skin.box);
+    //    EditorGUI.indentLevel++;
 
-        showItemSlots[index] = EditorGUILayout.Foldout(showItemSlots[index], "Item slot " + index);
-        if (showItemSlots[index])
-        {
-            EditorGUILayout.PropertyField(itemImagesProperty.GetArrayElementAtIndex(index));
-            EditorGUILayout.PropertyField(itemsProperty.GetArrayElementAtIndex(index));
-        }
-        EditorGUI.indentLevel--;
-        EditorGUILayout.EndVertical();
-    }
+    //    showItemSlots[index] = EditorGUILayout.Foldout(showItemSlots[index], "Item slot " + index);
+    //    if (showItemSlots[index])
+    //    {
+    //        EditorGUILayout.PropertyField(itemImagesProperty.GetArrayElementAtIndex(index));
+    //        EditorGUILayout.PropertyField(itemsProperty.GetArrayElementAtIndex(index));
+    //    }
+    //    EditorGUI.indentLevel--;
+    //    EditorGUILayout.EndVertical();
+    //}
 }

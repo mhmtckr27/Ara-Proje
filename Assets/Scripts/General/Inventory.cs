@@ -9,18 +9,24 @@ public class Inventory : MonoBehaviour
 {
 	public const int numItemSlots = 2;
 
-	public Image[] itemImages = new Image[numItemSlots];
-	public Item[] items = new Item[numItemSlots];
-	public int itemCount = 0;
+	[System.Serializable]
+	public struct ItemStruct
+	{
+		public Image itemImage;
+		[HideInInspector]public Item item;
+	}
+	public ItemStruct[] items = new ItemStruct[numItemSlots];
+
+	[HideInInspector] public int itemCount = 0;
 	public void AddItem(Item itemToAdd)
 	{
 		for (int i = 0; i < items.Length; i++)
 		{
-			if(items[i] == null)
+			if(items[i].item == null)
 			{
-				items[i] = itemToAdd;
-				itemImages[i].sprite = itemToAdd.sprite;
-				itemImages[i].enabled = true;
+				items[i].item = itemToAdd;
+				items[i].itemImage.sprite = itemToAdd.sprite;
+				items[i].itemImage.enabled = true;
 				itemCount++;
 				return;
 			}
@@ -31,11 +37,11 @@ public class Inventory : MonoBehaviour
 	{
 		for (int i = 0; i < items.Length; i++)
 		{
-			if (items[i] == itemToRemove)
+			if (items[i].item == itemToRemove)
 			{
-				items[i] = null;
-				itemImages[i].sprite = null;
-				itemImages[i].enabled = false;
+				items[i].item = null;
+				items[i].itemImage.sprite = null;
+				items[i].itemImage.enabled = false;
 				itemCount--;
 				return;
 			}
@@ -46,9 +52,9 @@ public class Inventory : MonoBehaviour
 	{
 		for (int i = 0; i < items.Length; i++)
 		{
-			if(items[i] != null)
+			if(items[i].item != null)
 			{
-				return items[i];
+				return items[i].item;
 			}
 		}
 		return null;

@@ -4,7 +4,7 @@ www.hayricakir.com
 */
 public partial class Animal
 {
-	enum State
+	enum State1
 	{
 		Exploring,
 		EscapingFox,
@@ -17,5 +17,13 @@ public partial class Animal
 		Reproducing,
 		WaitingForMate,
 		Resting
+	}
+	public enum State
+	{
+		Eating,
+		EatingDone,
+		Escaping,
+		Drinking,
+		Exploring
 	}
 }

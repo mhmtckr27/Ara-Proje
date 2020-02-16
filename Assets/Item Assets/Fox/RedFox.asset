@@ -15,11 +15,12 @@ MonoBehaviour:
   energyValue: 0
   nutritionValue: 0
   sprite: {fileID: 0}
-  fatPercentage: 0
-  proteinPercentage: 0
-  carbohydratePercentage: 0
-  weightInKg: 0
+  fatPercentage: 0.049
+  proteinPercentage: 0.101
+  carbohydratePercentage: 0.147
+  moisturePercentage: 0
+  weightInKg: 7
   baseThirstinessValue: 0
-  thirstinessValue: 0
+  thirstinessValue: 2.68975
   reproductiveUrgeIncrementValue: 0
-  eatablePercentage: 0
+  ediblePercentage: 0

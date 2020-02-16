@@ -7,4 +7,5 @@ using UnityEngine;
 public interface ICanStockFood
 {
 	void StockFood(Food foodFound);
+	void EatFood(Item foodFound);
 }

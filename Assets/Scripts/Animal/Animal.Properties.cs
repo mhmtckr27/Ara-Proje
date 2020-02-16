@@ -38,13 +38,13 @@ public partial class Animal
 			animalStatsUI.reproductiveUrgeBar.fillAmount = ReproductiveUrge / MAXReproductiveUrge;
 		}
 	}
-	public float Energy
+	public float EnergySaturation
 	{
-		get => _energy;
+		get => _energySaturation;
 		set
 		{
-			_energy = value;
-			animalStatsUI.energyBar.fillAmount = Energy / MAXEnergy;
+			_energySaturation = value > MAXEnergySaturation ? MAXEnergySaturation : value;
+			animalStatsUI.energyBar.fillAmount = EnergySaturation / MAXEnergySaturation;
 			AssignColorToBar(value, animalStatsUI.energyBar);
 		}
 	}
@@ -104,10 +104,36 @@ public partial class Animal
 			_charisma = value;
 		}
 	}
+	public float CurrentFoodIntake 
+	{ 
+		get => currentFoodIntake;
+		set
+		{
+			currentFoodIntake = value;
+			FoodSaturation = currentFoodIntake / foodIntakeNeed * MAXFoodSaturation;
+		}
+	}
+	public float CurrentWaterIntake 
+	{ 
+		get => currentWaterIntake;
+		set
+		{
+			currentWaterIntake = value;
+			WaterSaturation = currentWaterIntake / waterIntakeNeed * MAXWaterSaturation;
+		}
+	}
+	public float CurrentEnergy 
+	{ 
+		get => currentEnergy;
+		set
+		{
+			currentEnergy = value;
+			EnergySaturation = currentEnergy / energyIntakeNeed * MAXEnergySaturation;
+		}
+	}
+
 	public float EscapeRadius { get => _escapeRadius; set => _escapeRadius = value; }
 	public float EscapeTimer { get => _escapeTimer; set => _escapeTimer = value; }
-
-
 	#endregion
 
 	private void AssignColorToBar(float value, Image bar)
