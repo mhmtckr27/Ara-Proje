@@ -165,7 +165,7 @@ MonoBehaviour:
     foodSaturationBar: {fileID: 1028332253085390600}
     waterSaturationBar: {fileID: 1135438885495942681}
     reproductiveUrgeBar: {fileID: 3754110914188052409}
-    remainingLifeTimeBar: {fileID: 2360812171244169080}
+    remainingLifeTimeBar: {fileID: 3952500971831925061}
     energyBar: {fileID: 7415269888623022180}
     moveSpeedText: {fileID: 7885685090986095346}
     angularSpeedText: {fileID: 4798278880347750182}

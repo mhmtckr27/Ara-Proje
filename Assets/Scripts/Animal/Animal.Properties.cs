@@ -14,8 +14,8 @@ public partial class Animal
 		get => _foodSaturation;
 		set
 		{
-			_foodSaturation = value;
-			animalStatsUI.foodSaturationBar.fillAmount = _foodSaturation / maxFoodSaturation;
+			_foodSaturation = value > MAXFoodSaturation ? MAXFoodSaturation : value;
+			animalStatsUI.foodSaturationBar.fillAmount = _foodSaturation / MAXFoodSaturation;
 			AssignColorToBar(value, animalStatsUI.foodSaturationBar);
 		}
 	}
@@ -24,8 +24,8 @@ public partial class Animal
 		get => _waterSaturation;
 		set
 		{
-			_waterSaturation = value;
-			animalStatsUI.waterSaturationBar.fillAmount = WaterSaturation / maxWaterSaturation;
+			_waterSaturation = value > MAXWaterSaturation ? MAXWaterSaturation : value;
+			animalStatsUI.waterSaturationBar.fillAmount = WaterSaturation / MAXWaterSaturation;
 			AssignColorToBar(value, animalStatsUI.waterSaturationBar);
 		}
 	}
@@ -34,8 +34,8 @@ public partial class Animal
 		get => _reproductiveUrge;
 		set
 		{
-			_reproductiveUrge = value;
-			animalStatsUI.reproductiveUrgeBar.fillAmount = ReproductiveUrge / maxReproductiveUrge;
+			_reproductiveUrge = value > MAXReproductiveUrge ? MAXReproductiveUrge : value;
+			animalStatsUI.reproductiveUrgeBar.fillAmount = ReproductiveUrge / MAXReproductiveUrge;
 		}
 	}
 	public float Energy
@@ -44,7 +44,7 @@ public partial class Animal
 		set
 		{
 			_energy = value;
-			animalStatsUI.energyBar.fillAmount = Energy / maxEnergy;
+			animalStatsUI.energyBar.fillAmount = Energy / MAXEnergy;
 			AssignColorToBar(value, animalStatsUI.energyBar);
 		}
 	}
@@ -54,7 +54,7 @@ public partial class Animal
 		set
 		{
 			_moveSpeed = value;
-			animalStatsUI.moveSpeedText.text += (value.ToString("F1") + "/" + maxMoveSpeed);  
+			animalStatsUI.moveSpeedText.text += (value.ToString("F1") + "/" + MAXMoveSpeed);  
 			navMeshAgent.speed = value;
 		}
 	}
@@ -64,7 +64,7 @@ public partial class Animal
 		set
 		{
 			_angularSpeed = value;
-			animalStatsUI.angularSpeedText.text += (value.ToString("F1") + "/" + maxAngularSpeed);
+			animalStatsUI.angularSpeedText.text += (value.ToString("F1") + "/" + MAXAngularSpeed);
 			navMeshAgent.angularSpeed = value;
 		}
 	}
@@ -74,7 +74,7 @@ public partial class Animal
 		set
 		{
 			_acceleration = value;
-			animalStatsUI.accelerationText.text += (value.ToString("F1") + "/" + maxAcceleration);
+			animalStatsUI.accelerationText.text += (value.ToString("F1") + "/" + MAXAcceleration);
 			navMeshAgent.acceleration = value;
 		}
 	}
@@ -93,7 +93,7 @@ public partial class Animal
 		set
 		{
 			_exploreRadius = value;
-			animalStatsUI.exploreRadiusText.text += (value.ToString("F1") + "/" + maxExploreRadius);
+			animalStatsUI.exploreRadiusText.text += (value.ToString("F1") + "/" + MAXExploreRadius);
 		}
 	}
 	public float Charisma 

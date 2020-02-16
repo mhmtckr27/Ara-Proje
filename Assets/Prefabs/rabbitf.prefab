@@ -1553,7 +1553,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 180, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 1.1515}
+  m_AnchoredPosition: {x: 0, y: 0.736}
   m_SizeDelta: {x: 20, y: 15}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!223 &2111282821
@@ -2254,7 +2254,7 @@ MeshFilter:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5724165758098602825}
-  m_Mesh: {fileID: 4493585093827132993, guid: 20558d13e277a9540834e4ee8224d2c8, type: 3}
+  m_Mesh: {fileID: 6890474846164958109, guid: a2de02b93c8ff88489fdfcbbefeeed85, type: 3}
 --- !u!114 &969092723
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2308,7 +2308,7 @@ MonoBehaviour:
   viewRadiusBack: 13.64049
   viewAngleBack: 171.05826
   animalScript: {fileID: 3328987644580737609}
-  parentCollider: {fileID: 3328987644580737652}
+  collider: {fileID: 0}
   viewAngleDangerRNG: {x: 0, y: 90}
   viewRadiusFrontRNG: {x: 3, y: 20}
   viewAngleFrontRNG: {x: 90, y: 270}
@@ -2489,6 +2489,7 @@ GameObject:
   - component: {fileID: 5724165756754651159}
   - component: {fileID: 5724165758501990333}
   - component: {fileID: 3328987644580737609}
+  - component: {fileID: 7452326776547887567}
   m_Layer: 10
   m_Name: rabbitf
   m_TagString: Rabbit
@@ -2523,8 +2524,8 @@ BoxCollider:
   m_IsTrigger: 0
   m_Enabled: 1
   serializedVersion: 2
-  m_Size: {x: 0.51843625, y: 0.76512265, z: 0.8202632}
-  m_Center: {x: 0, y: 0.38256133, z: 0.005963117}
+  m_Size: {x: 0.20344803, y: 0.20339012, z: 0.23384306}
+  m_Center: {x: 0, y: 0.10169506, z: 0.005963117}
 --- !u!54 &5724165756754651159
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -2550,7 +2551,7 @@ NavMeshAgent:
   m_GameObject: {fileID: 6706736938451006008}
   m_Enabled: 1
   m_AgentTypeID: 0
-  m_Radius: 0.41609472
+  m_Radius: 0.13
   m_Speed: 3.5
   m_Acceleration: 8
   avoidancePriority: 50
@@ -2559,7 +2560,7 @@ NavMeshAgent:
   m_AutoTraverseOffMeshLink: 1
   m_AutoBraking: 1
   m_AutoRepath: 1
-  m_Height: 0.66
+  m_Height: 0.21
   m_BaseOffset: 0
   m_WalkableMask: 4294967295
   m_ObstacleAvoidanceType: 1
@@ -2585,7 +2586,7 @@ MonoBehaviour:
     lifeTimeRNG: {x: 60, y: 120}
     energyConsumeSpeedRNG: {x: 1, y: 20}
     baseCharisma: 0
-    moveSpeedRNG: {x: 1, y: 20}
+    moveSpeedRNG: {x: 1, y: 1}
     angularSpeedRNG: {x: 1, y: 360}
     accelerationRNG: {x: 1, y: 20}
     exploreTimerRNG: {x: 4, y: 4}
@@ -2596,20 +2597,37 @@ MonoBehaviour:
     foodSaturationBar: {fileID: 1088408542}
     waterSaturationBar: {fileID: 556920677}
     reproductiveUrgeBar: {fileID: 1416171544}
-    remainingLifeTimeBar: {fileID: 1339336212}
+    remainingLifeTimeBar: {fileID: 308886605}
     energyBar: {fileID: 370341062}
     moveSpeedText: {fileID: 6964953549474078102}
     angularSpeedText: {fileID: 3866551048516338939}
     accelerationText: {fileID: 5895135985571943866}
     exploreTimerText: {fileID: 5089506860665505901}
     exploreRadiusText: {fileID: 1747540454739573177}
-  collider: {fileID: 3328987644580737652}
   navMeshAgent: {fileID: 5724165758501990333}
   canvas: {fileID: 2111282817}
   child: {fileID: 5724165758098602825}
   targetNearThreshold: 0.1
   fieldOfView: {fileID: 892115452}
   currentPriority: 5
+  currentPrey: {fileID: 0}
+--- !u!114 &7452326776547887567
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6706736938451006008}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 34f71da9ccd12ee44b1d2f0feb0b976c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  onDestroyEvent:
+    m_PersistentCalls:
+      m_Calls: []
+  animalScript: {fileID: 3328987644580737609}
+  asFoodItem: {fileID: 11400000, guid: 6e91e8464069fa1428b37b3901973212, type: 2}
 --- !u!1 &7281460860445901826
 GameObject:
   m_ObjectHideFlags: 0
