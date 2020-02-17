@@ -18,12 +18,9 @@ using com.hayricakir;
 public partial class Animal : MonoBehaviour, IReproducible
 {
 	#region Constant Variable Declarations
-	private const float GramsPerKilogram = 1000f;
-	private const float MAXLifeTime = 120f; //1 year = 60 sec.
-	private const float MAXFoodSaturation = 100f;
-	private const float MAXWaterSaturation = 100f;
-	private const float MAXReproductiveUrge = 100f;
-	private const float MAXEnergySaturation = 100f;
+	private const float GRAMSPERKG = 1000f;
+	private const float MAXLifeTimeYears = 20f;
+	private const float HUNDRED = 100f;
 	private const float MAXEnergyConsumeSpeed = 20;
 	private const float MAXMoveSpeed = 20;
 	private const float MAXAngularSpeed = 360;
@@ -31,10 +28,13 @@ public partial class Animal : MonoBehaviour, IReproducible
 	private const float restLimit = 90;//eğer tokluk ve suya doygunluk bu sınırın üstündeyse ve üreme dürtüsü de bunun altındaysa rest durumuna geçer.
 	private const float criticalLimit = 25f;
 	private const float forgetDangerTime = 10f;
+
 	private const float MAXExploreTimer = 10f;
-	private const float MAXEscapeTimer = 10f;
 	private const float MAXExploreRadius = 20f;
+	private const float MAXEscapeTimer = 10f;
 	private const float MAXEscapeRadius = 20f;
+	
+	private const float MAXWeight = 100;
 	private const string waterTag = "Water";
 	#endregion
 
@@ -43,7 +43,7 @@ public partial class Animal : MonoBehaviour, IReproducible
 	public float _waterSaturation;//suya doygunluk
 	private float _reproductiveUrge;//suya doygunluk
 	public float _energySaturation;
-	private float _lifeTime;
+	private TimeSpan _lifeSpan;
 	private float _moveSpeed;
 	private float _angularSpeed;
 	private float _acceleration;
@@ -57,9 +57,9 @@ public partial class Animal : MonoBehaviour, IReproducible
 	private DateTime currentLifeTimeDateTime;
 	private float currentAge;
 	private DateTime bornDate;
-	[HideInInspector] private float currentFoodIntake;
-	[HideInInspector] private float currentWaterIntake;
-	[HideInInspector] private float currentEnergy;
+	public float currentFoodIntake;
+	public float currentWaterIntake;
+	private float currentEnergy;
 	#endregion
 
 	#region Inspector Fields
@@ -74,6 +74,8 @@ public partial class Animal : MonoBehaviour, IReproducible
 	[SerializeField] private float targetNearThreshold;
 	[SerializeField] private FieldOfView fieldOfView;
 	[SerializeField] private Food asFood;
+	[SerializeField] public float bitePeriod;
+	[SerializeField] public float biteWeight;
 	[Header("Daily Needs")]
 	//per day based. percentage of body weight.
 	[SerializeField] [Range(0, 1)] private float foodIntakeNeedPercentage;
@@ -146,7 +148,6 @@ public partial class Animal : MonoBehaviour, IReproducible
 
 	public virtual void Start()
 	{
-		//TODO: call initialize from here.
 		Initialize();
 	}
 	private void OnMouseDown()
@@ -176,9 +177,8 @@ public partial class Animal : MonoBehaviour, IReproducible
 		ChooseAction();
 		Consume();
 		readyTime2 -= Time.deltaTime;
-		//Debug.Log((float)currentAge);
+		Debug.Log(LifeSpan.TotalDays);
 	}
-
 
 	public void Initialize()
 	{
@@ -190,8 +190,8 @@ public partial class Animal : MonoBehaviour, IReproducible
 		
 		EnergySaturation = UnityEngine.Random.Range(basicAttributes.energyRNG.x, basicAttributes.energyRNG.y);
 		_energyConsumeSpeed = UnityEngine.Random.Range(basicAttributes.energyConsumeSpeedRNG.x, basicAttributes.energyConsumeSpeedRNG.y);
-		_lifeTime = UnityEngine.Random.Range(basicAttributes.lifeTimeRNG.x, basicAttributes.lifeTimeRNG.y);
-
+		LifeSpan = LifeSpan.Add(new TimeSpan((int)(UnityEngine.Random.Range(basicAttributes.lifeTimeYearsRNG.x, basicAttributes.lifeTimeYearsRNG.y) * 365), 0, 0, 0));
+	
 		Charisma = basicAttributes.baseCharisma;
 
 		MoveSpeed = UnityEngine.Random.Range(basicAttributes.moveSpeedRNG.x, basicAttributes.moveSpeedRNG.y);
@@ -203,12 +203,12 @@ public partial class Animal : MonoBehaviour, IReproducible
 		
 		EscapeRadius = UnityEngine.Random.Range(basicAttributes.escapeRadiusRNG.x, basicAttributes.escapeRadiusRNG.y);
 		EscapeTimer = UnityEngine.Random.Range(basicAttributes.escapeTimerRNG.x, basicAttributes.escapeTimerRNG.y);
-
+		asFood.weightInKg = UnityEngine.Random.Range(basicAttributes.weightRNG.x, basicAttributes.weightRNG.y);
 
 		//TODO: hareket miktarini da iceren bir formul gelistir.
-		foodIntakeNeed = asFood.item.weightInKg * GramsPerKilogram * foodIntakeNeedPercentage;
-		waterIntakeNeed = asFood.item.weightInKg * GramsPerKilogram * waterIntakeNeedPercentage;
-		energyIntakeNeed = asFood.item.weightInKg * energyKcalNeedPerKg;
+		foodIntakeNeed = asFood.weightInKg * GRAMSPERKG * foodIntakeNeedPercentage;
+		waterIntakeNeed = asFood.weightInKg * GRAMSPERKG * waterIntakeNeedPercentage;
+		energyIntakeNeed = asFood.weightInKg * energyKcalNeedPerKg;
 
 		FillList(diet, dietList);
 		FillList(dangers, dangerList);
@@ -259,7 +259,7 @@ public partial class Animal : MonoBehaviour, IReproducible
 		{
 			return;
 		}
-		float maxPriority = Mathf.Min(FoodSaturation, WaterSaturation, MAXReproductiveUrge - ReproductiveUrge);
+		float maxPriority = Mathf.Min(FoodSaturation, WaterSaturation, HUNDRED - ReproductiveUrge);
 		if(maxPriority > restLimit)
 		{
 			currentPriority = Priority.Rest;
@@ -343,169 +343,7 @@ public partial class Animal : MonoBehaviour, IReproducible
 	}
 
 	#region Escape Stuff
-	private Vector3 CalculateEscapeRoute(GameObject closestDanger)
-	{
-		transform.forward = transform.position - closestDanger.transform.position;
-		Vector3 escapePosition = UnityEngine.Random.insideUnitSphere * (EscapeRadius * Mathf.Tan(fieldOfView.viewAngleDanger));
-
-		escapePosition += transform.position;
-		escapePosition += transform.forward * EscapeRadius;
-
-		NavMeshHit navHit;
-
-		NavMesh.SamplePosition(escapePosition, out navHit, EscapeRadius, -1);
-
-		Debug.DrawLine(transform.position, escapePosition);
-		return navHit.position;
-	}
-
-	private float timeLeftToEscape;
-
-
-	protected void Escape(GameObject closestDanger)
-	{
-		timeLeftToEscape += Time.deltaTime;
-		//Debug.Log(timeLeftToEscape + "   " + EscapeTimer);
-		if(timeLeftToEscape >= EscapeTimer)
-		{
-			Vector3 escapePosition = CalculateEscapeRoute(closestDanger);
-			navMeshAgent.SetDestination(escapePosition);
-			timeLeftToEscape = 0;
-		}
-	}
-	protected GameObject FindClosestDanger()
-	{
-		float closestDistance = Mathf.Infinity;
-		float currentDistance;
-		GameObject closestDanger = null;
-		GameObject currentDanger;
-		//TODO: IJobParallelFor kullanabilirsen kullan bu ve diğer for'lar için.
-		foreach (string danger in dangerList)
-		{
-			if (objectsDictionary.TryGetValue(danger, out currentDanger))
-			{
-				currentDistance = Vector3.Distance(gameObject.transform.position, currentDanger.transform.position);
-				if (currentDistance < closestDistance)
-				{
-					closestDistance = currentDistance;
-					closestDanger = currentDanger;
-				}
-			}
-		}
-		return closestDanger;
-	}
-	#endregion
-
-	#region Explore stuff
-	private Vector3 RandomNavSphere(Vector3 origin, float dist, LayerMask layerMask)
-	{
-		Vector3 randDirection = UnityEngine.Random.insideUnitSphere * dist;
-
-		randDirection += origin;
-
-		NavMeshHit navHit;
-
-		NavMesh.SamplePosition(randDirection, out navHit, dist, layerMask);
-
-		return navHit.position;
-	}
-	protected void Explore()
-	{
-		timeLeftToExplore += Time.deltaTime;
-		animalStatsUI.exploreTimerText.text = "Explore timer: " +((ExploreTimer - timeLeftToExplore).ToString("F1") + "/" + MAXExploreTimer);
-		if (timeLeftToExplore >= ExploreTimer)
-		{
-			Vector3 newPos = RandomNavSphere(transform.position, ExploreRadius, -1);
-			navMeshAgent.SetDestination(newPos);
-			timeLeftToExplore = 0;
-		}
-	}
-	#endregion
-
-	#region Water stuff
-	private GameObject FindWater()
-	{
-		GameObject waterFound;
-		objectsDictionary.TryGetValue(waterTag, out waterFound);
-		return waterFound;
-	}
-	protected bool DrinkWater()
-	{
-		GameObject waterFound = FindWater();
-		if(waterFound == null)
-		{
-			return false;
-		}
-		navMeshAgent.SetDestination(waterFound.transform.position);
-		if (TargetNear(waterFound) && isReady)
-		{
-			isReady = false;
-			readyTime2 = readyTime1;
-			WaterSaturation += 20;
-		}
-		return true;
-	}
-	#endregion
-
-	#region Food stuff
-	protected virtual bool PriorityFood()
-	{
-		currentFood = FindFood();
-		if (currentFood == null)
-		{
-			return false;
-		}
-		GoToFood(currentFood);
-		if (TargetNear(currentFood.gameObject) && isReady)
-		{
-			EatFood(currentFood);
-		}
-		return true;
-	}
-	protected Food FindFood()
-	{
-		if (objectsDictionary.Count == 0)
-		{
-			return null;
-		}
-		foreach (string food in dietList)
-		{
-			GameObject foodFound;
-			if (objectsDictionary.TryGetValue(food, out foodFound))
-			{
-				return foodFound.GetComponent<Food>();
-			}
-		}
-		return null;
-	}
-	protected void GoToFood(Food currentFood)
-	{
-		//TODO: excuse me, WTF? :d
-		currentFood.onDestroyEvent.RemoveListener(OnPreyEaten);
-		currentFood.onDestroyEvent.AddListener(OnPreyEaten);
-		navMeshAgent.SetDestination(currentFood.transform.position);
-	}
-	protected virtual void EatFood(Food foodFound)
-	{
-		//TODO: properly implement timer to eat or drink next for preventing overeat/drink and rushing food or water.
-		readyTime2 = readyTime1;
-		isReady = false;
-		CurrentFoodIntake += foodFound.item.nutritionValue;
-		CurrentEnergy += foodFound.item.energyValue;
-		CurrentWaterIntake += foodFound.item.moistureValue;
-		objectsDictionary.Remove(foodFound.tag);
-		//GameObject carcass = GameObject.CreatePrimitive(PrimitiveType.Cube);
-		foodFound.GetEaten();
-	}
-
-	//if prey is eaten by either this animal or another, all animals going for that prey should stop and recalculate where to go.
-	private void OnPreyEaten()
-	{
-		if (navMeshAgent.hasPath)
-		{
-			navMeshAgent.ResetPath();
-		}
-	}
+	
 	#endregion
 
 	#region Mating Stuff
@@ -593,12 +431,14 @@ public partial class Animal : MonoBehaviour, IReproducible
 	[System.Serializable]
 	private class BasicAttributes
 	{
-		[SerializeField] [MinMaxSlider(0, MAXFoodSaturation)] public Vector2 foodSaturationRNG;
-		[SerializeField] [MinMaxSlider(0, MAXWaterSaturation)] public Vector2 waterSaturationRNG;
-		[SerializeField] [MinMaxSlider(0, MAXReproductiveUrge)] public Vector2 reproductiveUrgeRNG;
-		[SerializeField] [MinMaxSlider(1, MAXEnergySaturation)] public Vector2 energyRNG;
-		[SerializeField] [MinMaxSlider(1, MAXLifeTime)] public Vector2 lifeTimeRNG;
+		[SerializeField] [MinMaxSlider(0, HUNDRED)] public Vector2 foodSaturationRNG;
+		[SerializeField] [MinMaxSlider(0, HUNDRED)] public Vector2 waterSaturationRNG;
+		[SerializeField] [MinMaxSlider(0, HUNDRED)] public Vector2 reproductiveUrgeRNG;
+		[SerializeField] [MinMaxSlider(1, HUNDRED)] public Vector2 energyRNG;
+
+		[SerializeField] [MinMaxSlider(0, MAXLifeTimeYears)] public Vector2 lifeTimeYearsRNG;
 		[SerializeField] [MinMaxSlider(1, MAXEnergyConsumeSpeed)] public Vector2 energyConsumeSpeedRNG;
+		[SerializeField] [MinMaxSlider(0, MAXWeight)] public Vector2 weightRNG;
 		[SerializeField] public float baseCharisma;
 		[Header("Movement Stuff")]
 		[SerializeField] [MinMaxSlider(1, MAXMoveSpeed)] public Vector2 moveSpeedRNG;

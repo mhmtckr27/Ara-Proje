@@ -177,6 +177,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 12ad762c73abec84688da3628916c698, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _foodSaturation: 0
+  _waterSaturation: 0
+  _energySaturation: 0
   diet: 2
   dangers: 0
   basicAttributes:
@@ -186,6 +189,7 @@ MonoBehaviour:
     energyRNG: {x: 0, y: 0}
     lifeTimeRNG: {x: 70.55473, y: 120}
     energyConsumeSpeedRNG: {x: 0, y: 0}
+    weightRNG: {x: 0.056, y: 0.11}
     baseCharisma: 0
     moveSpeedRNG: {x: 1, y: 2}
     angularSpeedRNG: {x: 120, y: 360}
@@ -211,11 +215,16 @@ MonoBehaviour:
   targetNearThreshold: 0.25
   fieldOfView: {fileID: 39225559239586483}
   asFood: {fileID: 6631541306642285606}
+  bitePeriod: 0
+  biteWeight: 0
   foodIntakeNeedPercentage: 0.1
   waterIntakeNeedPercentage: 0.038
+  energyKcalNeedPerKg: 0
   foodIntakeNeed: 0
   waterIntakeNeed: 0
+  energyIntakeNeed: 0
   currentPriority: 0
+  currentState: 0
   currentFood: {fileID: 0}
   inventory: {fileID: 1108092540}
   rabbitItem: {fileID: 11400000, guid: 6e91e8464069fa1428b37b3901973212, type: 2}

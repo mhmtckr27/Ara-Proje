@@ -14,8 +14,8 @@ public partial class Animal
 		get => _foodSaturation;
 		set
 		{
-			_foodSaturation = value > MAXFoodSaturation ? MAXFoodSaturation : value;
-			animalStatsUI.foodSaturationBar.fillAmount = _foodSaturation / MAXFoodSaturation;
+			_foodSaturation = value > HUNDRED ? HUNDRED : value;
+			animalStatsUI.foodSaturationBar.fillAmount = _foodSaturation / HUNDRED;
 			AssignColorToBar(value, animalStatsUI.foodSaturationBar);
 		}
 	}
@@ -24,8 +24,8 @@ public partial class Animal
 		get => _waterSaturation;
 		set
 		{
-			_waterSaturation = value > MAXWaterSaturation ? MAXWaterSaturation : value;
-			animalStatsUI.waterSaturationBar.fillAmount = WaterSaturation / MAXWaterSaturation;
+			_waterSaturation = value > HUNDRED ? HUNDRED : value;
+			animalStatsUI.waterSaturationBar.fillAmount = WaterSaturation / HUNDRED;
 			AssignColorToBar(value, animalStatsUI.waterSaturationBar);
 		}
 	}
@@ -34,8 +34,8 @@ public partial class Animal
 		get => _reproductiveUrge;
 		set
 		{
-			_reproductiveUrge = value > MAXReproductiveUrge ? MAXReproductiveUrge : value;
-			animalStatsUI.reproductiveUrgeBar.fillAmount = ReproductiveUrge / MAXReproductiveUrge;
+			_reproductiveUrge = value > HUNDRED ? HUNDRED : value;
+			animalStatsUI.reproductiveUrgeBar.fillAmount = ReproductiveUrge / HUNDRED;
 		}
 	}
 	public float EnergySaturation
@@ -43,8 +43,8 @@ public partial class Animal
 		get => _energySaturation;
 		set
 		{
-			_energySaturation = value > MAXEnergySaturation ? MAXEnergySaturation : value;
-			animalStatsUI.energyBar.fillAmount = EnergySaturation / MAXEnergySaturation;
+			_energySaturation = value > HUNDRED ? HUNDRED : value;
+			animalStatsUI.energyBar.fillAmount = EnergySaturation / HUNDRED;
 			AssignColorToBar(value, animalStatsUI.energyBar);
 		}
 	}
@@ -110,7 +110,7 @@ public partial class Animal
 		set
 		{
 			currentFoodIntake = value;
-			FoodSaturation = currentFoodIntake / foodIntakeNeed * MAXFoodSaturation;
+			FoodSaturation = currentFoodIntake / foodIntakeNeed * HUNDRED;
 		}
 	}
 	public float CurrentWaterIntake 
@@ -119,7 +119,7 @@ public partial class Animal
 		set
 		{
 			currentWaterIntake = value;
-			WaterSaturation = currentWaterIntake / waterIntakeNeed * MAXWaterSaturation;
+			WaterSaturation = currentWaterIntake / waterIntakeNeed * HUNDRED;
 		}
 	}
 	public float CurrentEnergy 
@@ -128,9 +128,11 @@ public partial class Animal
 		set
 		{
 			currentEnergy = value;
-			EnergySaturation = currentEnergy / energyIntakeNeed * MAXEnergySaturation;
+			EnergySaturation = currentEnergy / energyIntakeNeed * HUNDRED;
 		}
 	}
+
+	public TimeSpan LifeSpan { get => _lifeSpan; set => _lifeSpan = value; }
 
 	public float EscapeRadius { get => _escapeRadius; set => _escapeRadius = value; }
 	public float EscapeTimer { get => _escapeTimer; set => _escapeTimer = value; }

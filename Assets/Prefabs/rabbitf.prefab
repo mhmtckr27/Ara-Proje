@@ -2488,8 +2488,8 @@ GameObject:
   - component: {fileID: 3328987644580737652}
   - component: {fileID: 5724165756754651159}
   - component: {fileID: 5724165758501990333}
-  - component: {fileID: 3328987644580737609}
   - component: {fileID: 7452326776547887567}
+  - component: {fileID: 3328987644580737609}
   m_Layer: 10
   m_Name: rabbitf
   m_TagString: Rabbit
@@ -2564,6 +2564,34 @@ NavMeshAgent:
   m_BaseOffset: 0
   m_WalkableMask: 4294967295
   m_ObstacleAvoidanceType: 1
+--- !u!114 &7452326776547887567
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6706736938451006008}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 34f71da9ccd12ee44b1d2f0feb0b976c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  onDestroyEvent:
+    m_PersistentCalls:
+      m_Calls: []
+  item: {fileID: 11400000, guid: 6e91e8464069fa1428b37b3901973212, type: 2}
+  energyValue: 0
+  nutritionValue: 0
+  moistureValue: 0
+  fatPercentage: 0.212
+  proteinPercentage: 0.092
+  carbohydratePercentage: 0
+  moisturePercentage: 0.685
+  weightInKg: 1
+  reproductiveUrgeIncrementValue: 5
+  ediblePercentage: 0.85
+  edibleWeight: 0
+  carcassDestroyWaitThreshold: 0.02
 --- !u!114 &3328987644580737609
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2576,6 +2604,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b8805534f0c458c45aebe7865667db47, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _foodSaturation: 0
+  _waterSaturation: 0
+  _energySaturation: 0
   diet: 1
   dangers: 2
   basicAttributes:
@@ -2585,6 +2616,7 @@ MonoBehaviour:
     energyRNG: {x: 1, y: 40}
     lifeTimeRNG: {x: 60, y: 120}
     energyConsumeSpeedRNG: {x: 1, y: 20}
+    weightRNG: {x: 0, y: 0}
     baseCharisma: 0
     moveSpeedRNG: {x: 1, y: 1}
     angularSpeedRNG: {x: 1, y: 360}
@@ -2609,25 +2641,18 @@ MonoBehaviour:
   child: {fileID: 5724165758098602825}
   targetNearThreshold: 0.1
   fieldOfView: {fileID: 892115452}
+  asFood: {fileID: 0}
+  bitePeriod: 0
+  biteWeight: 0
+  foodIntakeNeedPercentage: 0
+  waterIntakeNeedPercentage: 0
+  energyKcalNeedPerKg: 0
+  foodIntakeNeed: 0
+  waterIntakeNeed: 0
+  energyIntakeNeed: 0
   currentPriority: 5
-  currentPrey: {fileID: 0}
---- !u!114 &7452326776547887567
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6706736938451006008}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 34f71da9ccd12ee44b1d2f0feb0b976c, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  onDestroyEvent:
-    m_PersistentCalls:
-      m_Calls: []
-  animalScript: {fileID: 3328987644580737609}
-  asFoodItem: {fileID: 11400000, guid: 6e91e8464069fa1428b37b3901973212, type: 2}
+  currentState: 0
+  currentFood: {fileID: 0}
 --- !u!1 &7281460860445901826
 GameObject:
   m_ObjectHideFlags: 0

@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   energyValue: 712.30005
   nutritionValue: 258.4
-  moistureValue: 87.33751
+  moistureValue: 43.668755
   sprite: {fileID: 21300000, guid: 8c44d51ada0541945b8d789ef824f1de, type: 3}
   fatPercentage: 0.092
   proteinPercentage: 0.212
@@ -24,3 +24,4 @@ MonoBehaviour:
   reproductiveUrgeIncrementValue: 5
   ediblePercentage: 0.85
   edibleWeight: 850
+  carcassDestroyWaitThreshold: 0.25
