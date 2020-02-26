@@ -8,7 +8,7 @@ using UnityEditor;
 [CustomEditor(typeof(Inventory))]
 public class InventoryEditor : Editor
 {
-    private bool[] showItemSlots = new bool[Inventory.numItemSlots];
+    private bool[] showItemSlots = new bool[Inventory.numFoodSlots];
     private SerializedProperty itemImagesProperty;
     private SerializedProperty itemsProperty;
     private const string inventoryPropItemImagesName = "itemImages";
@@ -30,7 +30,7 @@ public class InventoryEditor : Editor
         base.OnInspectorGUI();
         if (GUILayout.Button("Stock Rabbit"))
         {
-            FindObjectOfType<RedFox>().inventory.AddItem(FindObjectOfType<RedFox>().rabbitItem);
+           // FindObjectOfType<RedFox>().inventory.AddItem(FindObjectOfType<RedFox>().rabbitItem);
         }
     }
     //private void ItemSlotGUI(int index)

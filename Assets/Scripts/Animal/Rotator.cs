@@ -5,14 +5,16 @@ www.hayricakir.com
 using UnityEngine;
 using System.Collections;
 using UnityEngine.AI;
+using System.Threading;
 
 public class Rotator : MonoBehaviour
 {
     [SerializeField] private LayerMask mask;
     [SerializeField] private NavMeshAgent parentAgent;
-    private void Start()
+    private void Awake()
     {
         StartCoroutine("AlignToTerrainWithDelay", .25f);
+        GameController.animalRotators.Add(this);
     }
 
     IEnumerator AlignToTerrainWithDelay(float delay)
@@ -20,10 +22,15 @@ public class Rotator : MonoBehaviour
         while (true)
         {
             yield return new WaitForSeconds(delay);
-            AlignToTerrain();
+            ThreadStart thread = delegate
+            {
+                AlignToTerrain();
+            };
+            thread.Invoke();
+            //AlignToTerrain();
         }
     }
-    void AlignToTerrain()
+    public void AlignToTerrain()
     {
         RaycastHit hit;
         if (Physics.Raycast(new Vector3(transform.position.x, transform.position.y + 2, transform.position.z), -Vector3.up, out hit, 3, mask))

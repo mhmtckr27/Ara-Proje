@@ -7,6 +7,8 @@ using UnityEngine;
 
 public partial class Animal
 {
+	public Coroutine eatFoodProcess;
+	public Coroutine swallowBiteProcess;
 	protected virtual bool PriorityFood()
 	{
 		currentFood = FindFood();
@@ -32,6 +34,8 @@ public partial class Animal
 			GameObject foodFound;
 			if (objectsDictionary.TryGetValue(food, out foodFound))
 			{
+				//TODO: kontrole gerek kalmamali
+				if(foodFound!=null)
 				return foodFound.GetComponent<Food>();
 			}
 		}
@@ -42,7 +46,9 @@ public partial class Animal
 		//TODO: excuse me, WTF? :d
 		currentFood.onDestroyEvent.RemoveListener(OnPreyEaten);
 		currentFood.onDestroyEvent.AddListener(OnPreyEaten);
+		if (!navMeshAgent.isOnNavMesh) return;
 		navMeshAgent.SetDestination(currentFood.transform.position);
+		currentState = State.GoingToFood;
 	}
 	protected virtual void EatFood(Food foodFound)
 	{
@@ -62,7 +68,7 @@ public partial class Animal
 		while (bitesToFinish > 0)
 		{
 			float oldIntake = CurrentFoodIntake + CurrentWaterIntake;
-			StartCoroutine(SwallowBiteProcess(carcass, carcassFood));
+			swallowBiteProcess = StartCoroutine(SwallowBiteProcess(carcass, carcassFood));
 			//son lokmayi yedikten sonra bitePeriod beklemesine gerek yok.
 			yield return new WaitForSeconds(bitePeriod * (bitesToFinish != 1 ? 1 : 0));
 			bitesToFinish--;
@@ -74,6 +80,7 @@ public partial class Animal
 		Destroy(carcass);
 	}
 
+	//TODO: performans kaybi yasarsan sil. status barlarin smooth olarak artmasi icin tamamen gorsel amacli bir fonksiyon.
 	protected IEnumerator SwallowBiteProcess(GameObject carcass, Food carcassFood)
 	{
 		float remainingBiteToSwallow = biteWeight;
@@ -89,7 +96,7 @@ public partial class Animal
 			carcass.transform.localScale -= carcass.transform.localScale * biteDelay;
 			remainingBiteToSwallow -= carcassFood.edibleWeight * biteDelay;
 
-			asFood.UpdateNutritionValues(carcassFood.carbohydratePercentage, carcassFood.proteinPercentage, carcassFood.fatPercentage, carcassFood.edibleWeight * biteDelay);
+			asFood.UpdateNutritionValues(carcassFood.carbPercentage, carcassFood.proteinPercentage, carcassFood.fatPercentage, carcassFood.edibleWeight * biteDelay);
 		}
 	}
 	//if prey is eaten by either this animal or another, all animals going for that prey should stop and recalculate where to go.

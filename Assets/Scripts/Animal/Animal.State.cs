@@ -24,6 +24,9 @@ public partial class Animal
 		EatingDone,
 		Escaping,
 		Drinking,
-		Exploring
+		Exploring,
+		ExploringStarted,
+		Sleeping,
+		GoingToFood
 	}
 }

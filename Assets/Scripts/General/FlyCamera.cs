@@ -2,6 +2,7 @@
 Code by Hayri Cakir
 www.hayricakir.com
 */
+using UnityEditor;
 using UnityEngine;
 
 public class FlyCamera : MonoBehaviour
@@ -13,10 +14,13 @@ public class FlyCamera : MonoBehaviour
 	public float slowMoveFactor = 0.25f;
 	public float fastMoveFactor = 3;
 
+	public bool followActiveSelection;
+
 	private float rotationX = 0.0f;
 	private float rotationY = 0.0f;
 
 	private bool shouldRotate = true;
+	private bool shouldLock = false;
 	private float initialTimeScale;
 
 	void Start()
@@ -27,14 +31,6 @@ public class FlyCamera : MonoBehaviour
 
 	void Update()
 	{
-		if (shouldRotate)
-		{
-			rotationX += Input.GetAxis("Mouse X") * cameraSensitivity * Time.deltaTime;
-			rotationY += Input.GetAxis("Mouse Y") * cameraSensitivity * Time.deltaTime;
-			rotationY = Mathf.Clamp(rotationY, -90, 90);
-			transform.localRotation = Quaternion.AngleAxis(rotationX, Vector3.up);
-			transform.localRotation *= Quaternion.AngleAxis(rotationY, Vector3.left);
-		}
 
 		if (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift))
 		{
@@ -61,6 +57,22 @@ public class FlyCamera : MonoBehaviour
 			Cursor.lockState = (Cursor.lockState == CursorLockMode.Locked) ? CursorLockMode.None : CursorLockMode.Locked;
 			shouldRotate = shouldRotate ? false : true;
 			Time.timeScale = shouldRotate == false ? 0 : initialTimeScale;
+		}
+	}
+
+	private void LateUpdate()
+	{
+		if (followActiveSelection)
+		{
+			transform.LookAt(Selection.activeTransform);
+		}
+		else if (shouldRotate)
+		{
+			rotationX += Input.GetAxis("Mouse X") * cameraSensitivity * Time.deltaTime;
+			rotationY += Input.GetAxis("Mouse Y") * cameraSensitivity * Time.deltaTime;
+			rotationY = Mathf.Clamp(rotationY, -90, 90);
+			transform.localRotation = Quaternion.AngleAxis(rotationX, Vector3.up);
+			transform.localRotation *= Quaternion.AngleAxis(rotationY, Vector3.left);
 		}
 	}
 }

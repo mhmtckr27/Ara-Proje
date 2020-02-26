@@ -25,7 +25,7 @@ public class Food : MonoBehaviour
 	[HideInInspector] public float moistureValue;
 	[Range(0, 1)] public float fatPercentage;
 	[Range(0, 1)] public float proteinPercentage;
-	[Range(0, 1)] public float carbohydratePercentage;
+	[Range(0, 1)] public float carbPercentage;
 	public float proteinWeight;
 	public float carbWeight;
 	public float fatWeight;
@@ -33,18 +33,24 @@ public class Food : MonoBehaviour
 	public float weightInKg;
 	public float reproductiveUrgeIncrementValue;
 	[Range(0, 1)] public float ediblePercentage;
-	[HideInInspector] public float edibleWeight;
+	public float edibleWeight;
 	public float carcassDestroyWaitThreshold;
+	public float nutritionPercentage;
 
+	//TODO: minimum costla hesapla.
 	private void OnEnable()
 	{
 		float totalKcalFromFats = fatPercentage * kcalPerFatGram;
 		float totalKcalFromProteins = proteinPercentage * kcalPerProteinGram;
-		float totalKcalFromCarbohydrates = carbohydratePercentage * kcalPerCarbohydrateGram;
-		energyValue = (totalKcalFromCarbohydrates + totalKcalFromFats + totalKcalFromProteins) * ediblePercentage * weightInKg * gramsPerKilogram * energyBalanceMultiplier;
-		nutritionValue = weightInKg * ediblePercentage * (fatPercentage + proteinPercentage + carbohydratePercentage) * gramsPerKilogram;
-		moistureValue = weightInKg * ediblePercentage * moisturePercentage * gramsPerKilogram * moistureBalanceMultiplier;
+		float totalKcalFromCarbohydrates = carbPercentage * kcalPerCarbohydrateGram;
 		edibleWeight = ediblePercentage * weightInKg * gramsPerKilogram;
+		energyValue = (totalKcalFromCarbohydrates + totalKcalFromFats + totalKcalFromProteins) * ediblePercentage * weightInKg * gramsPerKilogram * energyBalanceMultiplier;
+		nutritionValue = weightInKg * ediblePercentage * (fatPercentage + proteinPercentage + carbPercentage) * gramsPerKilogram;
+		moistureValue = weightInKg * ediblePercentage * moisturePercentage * gramsPerKilogram * moistureBalanceMultiplier;
+		carbWeight = edibleWeight * carbPercentage;
+		proteinWeight = edibleWeight * proteinPercentage;
+		fatWeight = edibleWeight * fatPercentage;
+		nutritionPercentage = fatPercentage + proteinPercentage + carbPercentage;
 	}
 
 	internal void UpdateNutritionValues(float carbPercentage, float proteinPercentage, float fatPercentage, float edibleWeight)

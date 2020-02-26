@@ -7,6 +7,20 @@ using UnityEngine.AI;
 
 public partial class Animal
 {
+	private float timeLeftToEscape;
+
+	private bool InDanger()
+	{
+		for (int i = 0; i < dangerList.Count; i++)
+		{
+			string danger = dangerList[i];
+			if (objectsDictionary.ContainsKey(danger))
+			{
+				return true;
+			}
+		}
+		return false;
+	}
 	private Vector3 CalculateEscapeRoute(GameObject closestDanger)
 	{
 		transform.forward = transform.position - closestDanger.transform.position;
@@ -22,9 +36,6 @@ public partial class Animal
 		Debug.DrawLine(transform.position, escapePosition);
 		return navHit.position;
 	}
-
-	private float timeLeftToEscape;
-
 	protected void Escape(GameObject closestDanger)
 	{
 		timeLeftToEscape += Time.deltaTime;
@@ -32,9 +43,12 @@ public partial class Animal
 		if (timeLeftToEscape >= EscapeTimer)
 		{
 			Vector3 escapePosition = CalculateEscapeRoute(closestDanger);
+			//TODO: buna da gerek kalmamali kontrole.
+			if (!navMeshAgent.isOnNavMesh) return;
 			navMeshAgent.SetDestination(escapePosition);
 			timeLeftToEscape = 0;
 		}
+		currentState = State.Escaping;
 	}
 	protected GameObject FindClosestDanger()
 	{
@@ -47,6 +61,8 @@ public partial class Animal
 		{
 			if (objectsDictionary.TryGetValue(danger, out currentDanger))
 			{
+				//TODO: controle gerek kalmamali
+				if (currentDanger == null) return null;
 				currentDistance = Vector3.Distance(gameObject.transform.position, currentDanger.transform.position);
 				if (currentDistance < closestDistance)
 				{

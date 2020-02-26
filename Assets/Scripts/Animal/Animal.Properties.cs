@@ -48,13 +48,23 @@ public partial class Animal
 			AssignColorToBar(value, animalStatsUI.energyBar);
 		}
 	}
-	public float MoveSpeed
+	public float RunSpeed
 	{
-		get => _moveSpeed;
+		get => _runSpeed;
 		set
 		{
-			_moveSpeed = value;
-			animalStatsUI.moveSpeedText.text += (value.ToString("F1") + "/" + MAXMoveSpeed);  
+			_runSpeed = value;
+			animalStatsUI.runSpeed.text += (value.ToString("F1") + "/" + MAXRunSpeed);  
+			navMeshAgent.speed = value;
+		}
+	}
+	public float TrotSpeed
+	{
+		get => _trotSpeed;
+		set
+		{
+			_trotSpeed = value;
+			//animalStatsUI.runSpeed.text += (value.ToString("F1") + "/" + MAXRunSpeed);  
 			navMeshAgent.speed = value;
 		}
 	}

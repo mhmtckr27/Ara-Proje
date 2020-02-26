@@ -6,6 +6,7 @@ using com.hayricakir;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Threading;
 using TMPro;
 using UnityEngine;
 
@@ -23,6 +24,9 @@ public class GameController : MonoBehaviour
     [SerializeField] [Range(1, 10)] public float animalAgeUpdatePeriod;
     [SerializeField] public TimeFlowRate timeFlowRate;
 
+    public static List<FieldOfView> animalFOVs = new List<FieldOfView>();
+    public static List<Rotator> animalRotators = new List<Rotator>();
+    public static List<Animal> animals = new List<Animal>();
 	public static GameController Instance { get; private set; }
 
 	[System.Serializable]
@@ -43,7 +47,7 @@ public class GameController : MonoBehaviour
 
     void Awake()
     {
-        //SpawnObjects();        
+        SpawnObjects();        
         if (Instance != null && Instance != this)
         {
             Destroy(gameObject);
@@ -54,27 +58,66 @@ public class GameController : MonoBehaviour
         }
 
         currentGameTime.Init(1f);
-        //Time.timeScale = 50;
+        //Time.timeScale = 100;
+        
     }
-
+    private void FixedUpdate()
+    {
+        //foreach (FieldOfView fov in animalFOVs)
+        //{
+        //    if(fov == null)
+        //    {
+        //        continue;
+        //    }
+        //    ThreadStart thread = delegate
+        //    {
+        //        fov.FindVisibleTargets();
+        //    };
+        //    thread.Invoke();
+        //}
+        //foreach (Rotator rotator in animalRotators)
+        //{
+        //    if (rotator == null)
+        //    {
+        //        continue;
+        //    }
+        //    ThreadStart thread = delegate
+        //    {
+        //        rotator.AlignToTerrain();
+        //    };
+        //    thread.Invoke();
+        //}
+        //foreach (Animal animal in animals)
+        //{
+        //    if (animal == null)
+        //    {
+        //        continue;
+        //    }
+        //    ThreadStart thread = delegate
+        //    {
+        //        animal.DeterminePriority();
+        //        animal.ChooseAction();
+        //    };
+        //    thread.Invoke();
+        //}
+    }
     #region spawning stuff
     private void SpawnObjects()
     {
-        SpawnWater();
+        //SpawnWater();
         SpawnBunny();
         SpawnFox();
         SpawnGrass();
     }
-
     private void SpawnGrass()
     {
-        for (int i = 0; i < 125; i++)
+        for (int i = 0; i < 500; i++)
         {
-            float x = UnityEngine.Random.Range(150, 350);
-            float z = UnityEngine.Random.Range(150, 350);
+            float x = UnityEngine.Random.Range(-100, 100);
+            float z = UnityEngine.Random.Range(-100, 100);
 
             RaycastHit hit;
-            if (Physics.Raycast(new Vector3(x, -1, z), Vector3.down, out hit, Mathf.Infinity, groundLayer) && hit.distance < 19)
+            if (Physics.Raycast(new Vector3(x, 100, z), Vector3.down, out hit, Mathf.Infinity, groundLayer) && hit.distance < 92)
             {
                 Instantiate(grass, hit.point + Vector3.down * .05f, Quaternion.identity).transform.up = hit.normal;
             }
@@ -83,48 +126,55 @@ public class GameController : MonoBehaviour
 
     private void SpawnFox()
     {
-        for (int i = 0; i < 100; i++)
+        int foxCount = 0;
+        for (int i = 0; i < 500; i++)
         {
-            float x = UnityEngine.Random.Range(200, 320);
-            float z = UnityEngine.Random.Range(200, 320);
+            float x = UnityEngine.Random.Range(-100, 100);
+            float z = UnityEngine.Random.Range(-100, 100);
 
             RaycastHit hit;
-            if (Physics.Raycast(new Vector3(x, -1, z), Vector3.down, out hit, groundLayer))
+            if (Physics.Raycast(new Vector3(x, 100, z), Vector3.down, out hit, Mathf.Infinity, groundLayer) && hit.distance < 92)
             {
                 Instantiate(fox, hit.point + Vector3.up * .5f, Quaternion.identity);
+                foxCount++;
             }
         }
+        Debug.Log("total fox:" + foxCount);
     }
 
     private void SpawnBunny()
     {
-        for (int i = 0; i < 250; i++)
+        int bunnyCount = 0;
+        for (int i = 0; i < 500; i++)
         {
-            float x = UnityEngine.Random.Range(150, 350);
-            float z = UnityEngine.Random.Range(150, 350);
+            float x = UnityEngine.Random.Range(-100, 100);
+            float z = UnityEngine.Random.Range(-100, 100);
 
             RaycastHit hit;
-            if (Physics.Raycast(new Vector3(x, -1, z), Vector3.down, out hit, Mathf.Infinity, groundLayer) && hit.distance < 19)
+            if (Physics.Raycast(new Vector3(x, 100, z), Vector3.down, out hit, Mathf.Infinity, groundLayer) && hit.distance < 92)
             {
                 Instantiate(bunny, hit.point + Vector3.up * 0.25f, Quaternion.identity);
                 rabbits.Add(bunny);
+                bunnyCount++;
             }
         }
+        Debug.Log("total bunny:" + bunnyCount);
+
     }
 
     private void SpawnWater()
     {
-        for (int i = 150; i < 350; i++)
+        for (int i = 150; i< 350; i++)
         {
-            for (int j = 150; j < 350; j++)
+            for (int j = 150; j< 350; j++)
             {
                 RaycastHit hit;
 
-                if (Physics.Raycast(new Vector3(i, -1, j), Vector3.down, out hit, Mathf.Infinity, waterLayer) && hit.distance > 18.6 && hit.distance < 18.9)
+                if (Physics.Raycast(new Vector3(i, -1, j), Vector3.down, out hit, Mathf.Infinity, waterLayer) && hit.distance > 18.6 && hit.distance< 18.9)
                 {
                     //GameObject.CreatePrimitive(PrimitiveType.Sphere).transform.position = new Vector3(i, hit.point.y, j);
                     Instantiate(emptyObject).transform.position = new Vector3(i, hit.point.y, j);
-                }
+}
             }
         }
     }

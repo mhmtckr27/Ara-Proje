@@ -9,11 +9,15 @@ using UnityEngine;
 public class RedFox : Animal, ICanStockFood
 {
 	[SerializeField] public Inventory inventory;
+	[SerializeField] private MeshRenderer meshRenderer;
+	[SerializeField] private Color targetRed;
 	public Item rabbitItem;
+	public const float turnRedUpperLimit = 1 / 12f;
+
 	public override void PriorityExplore()
 	{
 		Food foodFound = FindFood();
-		if(foodFound != null)
+		if (foodFound != null)
 		{
 			navMeshAgent.SetDestination(foodFound.transform.position);
 
@@ -24,26 +28,48 @@ public class RedFox : Animal, ICanStockFood
 		}
 		else if (foodFound == null)
 		{
+			navMeshAgent.speed = TrotSpeed;
 			Explore();
 		}
 	}
 
+	//public override void FixedUpdate()
+	//{
+	//	base.FixedUpdate();
+	//	//StartCoroutine(TurnRedDelayed());
+	//}
+
+	private IEnumerator TurnRedDelayed()
+	{ 
+		while(meshRenderer.material.color != targetRed)
+		{
+			yield return new WaitForSeconds(1);
+			TurnRed();
+		}
+		Debug.LogError("bitti");
+	}
+
+	private void TurnRed()
+	{
+		meshRenderer.material.color = Color.Lerp(meshRenderer.material.color, targetRed, 0.0006f);
+	}
+
 	public void StockFood(Food foodFound)
 	{
-		inventory.AddItem(foodFound.item);
+		inventory.AddItem(foodFound);
 		foodFound.GetEaten();
 	}
 
-	
+
 	//if we have a food in our stock/inventory, eat it. Otherwise call the base script's
 	//PriorityFood function to find another food around us.
 	protected override bool PriorityFood()
 	{
-		Item currentFoodItem = inventory.GetItem();
-		if(currentFoodItem != null)
+		Food currentFood = inventory.GetItem();
+		if (currentFood != null)
 		{
-			inventory.RemoveItem(currentFoodItem);
-			EatFood(currentFoodItem);
+			inventory.RemoveItem(currentFood);
+			EatFood(currentFood);
 			return true;
 		}
 		return base.PriorityFood();
@@ -61,6 +87,39 @@ public class RedFox : Animal, ICanStockFood
 		//CurrentWaterIntake += foodFound.moistureValue;
 	}
 
+	protected override void DetermineState()
+	{
+		if (currentState == State.Eating)
+		{
+			if (FoodSaturation >= changePriorityLimit)
+			{
+				if(swallowBiteProcess != null)
+				{
+					StopCoroutine(swallowBiteProcess);
+					StopCoroutine(eatFoodProcess);
+				}
+				inventory.AddItem(carcassFood);
+				Destroy(carcass);
+				currentState = State.EatingDone;
+			}
+			return;
+		}
+		else if (currentState == State.ExploringStarted)
+		{
+			navMeshAgent.speed = TrotSpeed;
+			currentState = State.Exploring;
+		}
+		else if (currentState == State.GoingToFood)
+		{
+			navMeshAgent.speed = RunSpeed;
+		}
+		else if (currentState == State.EatingDone)
+		{
+		}
+	}
+	Food carcassFood;
+	GameObject carcass;
+
 	#region Food Stuff
 	protected override void EatFood(Food foodFound)
 	{
@@ -68,12 +127,12 @@ public class RedFox : Animal, ICanStockFood
 		currentState = State.Eating;
 		objectsDictionary.Remove(foodFound.tag);
 		//TODO: replace placeholder with fancy effects and proper carcass model.
-		GameObject carcass = GameObject.CreatePrimitive(PrimitiveType.Cube);
+		carcass = GameObject.CreatePrimitive(PrimitiveType.Cube);
 		carcass.transform.position = foodFound.transform.position;
 		carcass.transform.localScale = Vector3.one * .2f;
-		Food carcassFood = foodFound;
+		carcassFood = foodFound;
 		foodFound.GetEaten();
-		StartCoroutine(EatFoodProcess(carcass, carcassFood));
+		eatFoodProcess = StartCoroutine(EatFoodProcess(carcass, carcassFood));
 	}
 	#endregion
 }

@@ -2,6 +2,8 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
+using Unity.Jobs;
 
 public class FieldOfView : MonoBehaviour 
 {
@@ -45,10 +47,12 @@ public class FieldOfView : MonoBehaviour
 	}
 	#endif
 
-	private void Start() 
+	private void Awake() 
 	{
-		StartCoroutine ("FindTargetsWithDelay", .2f);
 		Initialize();
+		StartCoroutine ("FindTargetsWithDelay", .2f);
+
+		GameController.animalFOVs.Add(this);
 	}
 
 	private void Initialize()
@@ -66,12 +70,21 @@ public class FieldOfView : MonoBehaviour
 		while (true) 
 		{
 			yield return new WaitForSeconds (delay);
-			FindVisibleTargets();
+			//FindVisibleTargets();
 		}
 	}
+	public struct FindVisibleTargetsJob : IJob
+	{
+		public void Execute()
+		{
+			FindVisibleTargets();
+		}
+
+	}
+
 	private Collider[] ScanFieldOfView => Physics.OverlapSphere(transform.position, viewRadiusFront, targetMask, QueryTriggerInteraction.Collide);
 
-	private void FindVisibleTargets()
+	public void FindVisibleTargets()
 	{
 		animalScript.objectsDictionary.Clear();
 		List<Collider> targetsInViewRadius = ScanFieldOfView.ToList();
@@ -145,8 +158,10 @@ public class FieldOfView : MonoBehaviour
 
 	private bool ShouldReplace(Vector3 obj1, Vector3 obj2)
 	{
+		//float distToObj1 = (transform.position - obj1).sqrMagnitude;
 		float distToObj1 = Vector3.Distance(transform.position, obj1);
 		float distToObj2 = Vector3.Distance(transform.position, obj2);
+		//float distToObj2 = (transform.position - obj2).sqrMagnitude;
 		return distToObj1 > distToObj2 ? true : false;
 	}
 }

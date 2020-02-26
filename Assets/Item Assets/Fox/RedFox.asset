@@ -12,4 +12,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 12199eb313ed4c747a966929be8af19b, type: 3}
   m_Name: RedFox
   m_EditorClassIdentifier: 
-  sprite: {fileID: 0}
+  sprite: {fileID: 21300000, guid: 8269a8e6b5bba734d85e93eae95fde4d, type: 3}

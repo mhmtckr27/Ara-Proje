@@ -165,6 +165,23 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   item: {fileID: 11400000, guid: af1213e977487854898e9d22ff37c4d0, type: 2}
+  animal: {fileID: 759442718461288446}
+  energyValue: 0
+  nutritionValue: 0
+  moistureValue: 0
+  fatPercentage: 0.1
+  proteinPercentage: 0.3
+  carbPercentage: 0
+  proteinWeight: 0
+  carbWeight: 0
+  fatWeight: 0
+  moisturePercentage: 0.5
+  weightInKg: 0
+  reproductiveUrgeIncrementValue: 0
+  ediblePercentage: 0
+  edibleWeight: 0
+  carcassDestroyWaitThreshold: 0
+  nutritionPercentage: 0
 --- !u!114 &759442718461288446
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -180,21 +197,24 @@ MonoBehaviour:
   _foodSaturation: 0
   _waterSaturation: 0
   _energySaturation: 0
+  currentFoodIntake: 0
+  currentWaterIntake: 0
   diet: 2
   dangers: 0
   basicAttributes:
-    foodSaturationRNG: {x: 0, y: 14.881126}
-    waterSaturationRNG: {x: 95.68535, y: 100}
+    foodSaturationRNG: {x: 0, y: 0}
+    waterSaturationRNG: {x: 0, y: 0}
     reproductiveUrgeRNG: {x: 0, y: 0}
     energyRNG: {x: 0, y: 0}
-    lifeTimeRNG: {x: 70.55473, y: 120}
+    lifeTimeYearsRNG: {x: 1.8, y: 1.8}
     energyConsumeSpeedRNG: {x: 0, y: 0}
-    weightRNG: {x: 0.056, y: 0.11}
+    weightRNG: {x: 7, y: 7}
     baseCharisma: 0
-    moveSpeedRNG: {x: 1, y: 2}
-    angularSpeedRNG: {x: 120, y: 360}
-    accelerationRNG: {x: 8, y: 15}
-    exploreTimerRNG: {x: 1, y: 1}
+    runSpeedRNG: {x: 3, y: 5}
+    trotSpeedRNG: {x: 0.6, y: 1.3}
+    angularSpeedRNG: {x: 360, y: 360}
+    accelerationRNG: {x: 10, y: 20}
+    exploreTimerRNG: {x: 4, y: 4}
     exploreRadiusRNG: {x: 10, y: 10}
     escapeTimerRNG: {x: 4, y: 4}
     escapeRadiusRNG: {x: 10, y: 10}
@@ -204,7 +224,7 @@ MonoBehaviour:
     reproductiveUrgeBar: {fileID: 3754110914188052409}
     remainingLifeTimeBar: {fileID: 3952500971831925061}
     energyBar: {fileID: 7415269888623022180}
-    moveSpeedText: {fileID: 7885685090986095346}
+    runSpeed: {fileID: 7885685090986095346}
     angularSpeedText: {fileID: 4798278880347750182}
     accelerationText: {fileID: 7373335500382729694}
     exploreTimerText: {fileID: 9107632027768657451}
@@ -215,18 +235,20 @@ MonoBehaviour:
   targetNearThreshold: 0.25
   fieldOfView: {fileID: 39225559239586483}
   asFood: {fileID: 6631541306642285606}
-  bitePeriod: 0
-  biteWeight: 0
+  bitePeriod: 3
+  biteWeight: 200
   foodIntakeNeedPercentage: 0.1
   waterIntakeNeedPercentage: 0.038
-  energyKcalNeedPerKg: 0
+  energyKcalNeedPerKg: 121
   foodIntakeNeed: 0
   waterIntakeNeed: 0
   energyIntakeNeed: 0
   currentPriority: 0
-  currentState: 0
+  currentState: 3
   currentFood: {fileID: 0}
-  inventory: {fileID: 1108092540}
+  inventory: {fileID: 5835661761765854823}
+  meshRenderer: {fileID: 4410680747092454925}
+  targetRed: {r: 1, g: 0, b: 0, a: 1}
   rabbitItem: {fileID: 11400000, guid: 6e91e8464069fa1428b37b3901973212, type: 2}
 --- !u!1 &577974260013632821
 GameObject:
@@ -240,7 +262,7 @@ GameObject:
   - component: {fileID: 1208615548616699256}
   - component: {fileID: 7885685090986095346}
   m_Layer: 10
-  m_Name: MoveSpeedText
+  m_Name: RunSpeedText
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -489,7 +511,7 @@ MonoBehaviour:
   animalScript: {fileID: 759442718461288446}
   collider: {fileID: 1761347429}
   viewAngleDangerRNG: {x: 0, y: 90}
-  viewRadiusFrontRNG: {x: 3, y: 20}
+  viewRadiusFrontRNG: {x: 9.366334, y: 20}
   viewAngleFrontRNG: {x: 90, y: 270}
   viewRadiusBackRNG: {x: 11.682492, y: 20}
   viewAngleBackRNG: {x: 30, y: 0}
@@ -978,7 +1000,6 @@ GameObject:
   - component: {fileID: 3850550459327589689}
   - component: {fileID: 2233139459077090925}
   - component: {fileID: 5835661761765854823}
-  - component: {fileID: 1108092540}
   m_Layer: 10
   m_Name: Inventory
   m_TagString: Untagged
@@ -1044,29 +1065,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cf05f0a027d9b8945b9135f4ad0f62f9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  items:
-  - itemImage: {fileID: 0}
-    item: {fileID: 0}
-  - itemImage: {fileID: 0}
-    item: {fileID: 0}
-  itemCount: 0
---- !u!114 &1108092540
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4536832668375791427}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: cf05f0a027d9b8945b9135f4ad0f62f9, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  items:
-  - itemImage: {fileID: 3558526525645401439}
-    item: {fileID: 0}
-  - itemImage: {fileID: 3558526524535567119}
-    item: {fileID: 0}
+  foods:
+  - foodImage: {fileID: 3558526525645401439}
+    food: {fileID: 0}
+  - foodImage: {fileID: 3558526524535567119}
+    food: {fileID: 0}
   itemCount: 0
 --- !u!1 &4607873120799043811
 GameObject:
@@ -2993,12 +2996,6 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 824c555a45bc3184ea78e0621fa62e85, type: 3}
---- !u!224 &5161558416334338620 stripped
-RectTransform:
-  m_CorrespondingSourceObject: {fileID: 5161558416712873882, guid: 824c555a45bc3184ea78e0621fa62e85,
-    type: 3}
-  m_PrefabInstance: {fileID: 1049628070}
-  m_PrefabAsset: {fileID: 0}
 --- !u!114 &3558526524535567119 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 3558526524157034153, guid: 824c555a45bc3184ea78e0621fa62e85,
@@ -3011,6 +3008,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!224 &5161558416334338620 stripped
+RectTransform:
+  m_CorrespondingSourceObject: {fileID: 5161558416712873882, guid: 824c555a45bc3184ea78e0621fa62e85,
+    type: 3}
+  m_PrefabInstance: {fileID: 1049628070}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &2026460150
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -3265,6 +3268,12 @@ PrefabInstance:
 --- !u!1 &2668722296273476305 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: -927199367670048503, guid: dc71cf905491cd746a0ff7fbf4972c0a,
+    type: 3}
+  m_PrefabInstance: {fileID: 6208451640673223640}
+  m_PrefabAsset: {fileID: 0}
+--- !u!23 &4410680747092454925 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: -1504981713932161579, guid: dc71cf905491cd746a0ff7fbf4972c0a,
     type: 3}
   m_PrefabInstance: {fileID: 6208451640673223640}
   m_PrefabAsset: {fileID: 0}

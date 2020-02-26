@@ -14,6 +14,7 @@ using UnityEngine.AI;
 using UnityEngine.Events;
 using TMPro;
 using com.hayricakir;
+using System.Threading;
 
 public partial class Animal : MonoBehaviour, IReproducible
 {
@@ -22,11 +23,13 @@ public partial class Animal : MonoBehaviour, IReproducible
 	private const float MAXLifeTimeYears = 20f;
 	private const float HUNDRED = 100f;
 	private const float MAXEnergyConsumeSpeed = 20;
-	private const float MAXMoveSpeed = 20;
+	private const float MAXRunSpeed = 100000;
+	private const float MAXTrotSpeed = 2;
 	private const float MAXAngularSpeed = 360;
-	private const float MAXAcceleration = 20;
+	private const float MAXAcceleration = 1000000;
 	private const float restLimit = 90;//eğer tokluk ve suya doygunluk bu sınırın üstündeyse ve üreme dürtüsü de bunun altındaysa rest durumuna geçer.
-	private const float criticalLimit = 25f;
+	protected const float changePriorityLimit = 60;
+	protected const float criticalLimit = 25f;
 	private const float forgetDangerTime = 10f;
 
 	private const float MAXExploreTimer = 10f;
@@ -44,7 +47,8 @@ public partial class Animal : MonoBehaviour, IReproducible
 	private float _reproductiveUrge;//suya doygunluk
 	public float _energySaturation;
 	private TimeSpan _lifeSpan;
-	private float _moveSpeed;
+	private float _runSpeed;
+	private float _trotSpeed;
 	private float _angularSpeed;
 	private float _acceleration;
 	private float _energyConsumeSpeed;
@@ -55,7 +59,7 @@ public partial class Animal : MonoBehaviour, IReproducible
 	private float _charisma;
 	private float stamina;
 	private DateTime currentLifeTimeDateTime;
-	private float currentAge;
+	protected float currentAge;
 	private DateTime bornDate;
 	public float currentFoodIntake;
 	public float currentWaterIntake;
@@ -103,16 +107,6 @@ public partial class Animal : MonoBehaviour, IReproducible
 	private float readyTime2;
 	private float timeLeftToExplore;
 
-	public struct LifeTime
-	{
-		public int second;
-		public int minute;
-		public int hour;
-		public int day;
-		public int month;
-		public int year;
-	}
-
 	private void IsReady()
 	{
 		isReady = true;
@@ -146,9 +140,19 @@ public partial class Animal : MonoBehaviour, IReproducible
 	}
 	#endregion
 
-	public virtual void Start()
+	private void OnEnable()
 	{
 		Initialize();
+	}
+	private void Awake()
+	{
+		Debug.Log(GameController.animalFOVs.Count);
+		GameController.animals.Add(this);
+	}
+	public virtual void Start()
+	{
+		StartCoroutine(UpdateLifeTimeCoroutine());
+		StartCoroutine(FindTargetsWithDelay(0f));
 	}
 	private void OnMouseDown()
 	{
@@ -161,25 +165,33 @@ public partial class Animal : MonoBehaviour, IReproducible
 			canvas.SetActive(true);
 		}
 	}
-	private void Update()
+	public virtual void FixedUpdate()
 	{
-		//TODO: delete before final build
-		if(Selection.activeGameObject == gameObject || Selection.activeGameObject == child)
-		{
-			canvas.SetActive(true);
-		}
-		//TODO: duzenle burayi
-		if(readyTime2 <= 0f)
-		{
-			isReady = true;
-		}
-		DeterminePriority();
-		ChooseAction();
-		Consume();
-		readyTime2 -= Time.deltaTime;
-		Debug.Log(LifeSpan.TotalDays);
-	}
+		#region Debugging, delete before final build
+		//if (Selection.activeGameObject == gameObject || Selection.activeGameObject == child)
+		//{
+		//	canvas.SetActive(true);
+		//}
+		#endregion
 
+		//DeterminePriority();
+		//ChooseAction();
+	}
+	private IEnumerator FindTargetsWithDelay(float delay)
+	{
+		while (true)
+		{
+			yield return new WaitForSeconds(Time.fixedDeltaTime);
+			ThreadStart thread = delegate
+			{
+				DeterminePriority();
+				ChooseAction();
+			};
+			thread.Invoke();
+			//FindVisibleTargets();
+		}
+	}
+	#region Initialization
 	public void Initialize()
 	{
 		bornDate = Calendar.CurrentDateTime;
@@ -194,7 +206,8 @@ public partial class Animal : MonoBehaviour, IReproducible
 	
 		Charisma = basicAttributes.baseCharisma;
 
-		MoveSpeed = UnityEngine.Random.Range(basicAttributes.moveSpeedRNG.x, basicAttributes.moveSpeedRNG.y);
+		RunSpeed = UnityEngine.Random.Range(basicAttributes.runSpeedRNG.x, basicAttributes.runSpeedRNG.y);
+		TrotSpeed = UnityEngine.Random.Range(basicAttributes.trotSpeedRNG.x, basicAttributes.trotSpeedRNG.y);
 		AngularSpeed = UnityEngine.Random.Range(basicAttributes.angularSpeedRNG.x, basicAttributes.angularSpeedRNG.y);
 		Acceleration = UnityEngine.Random.Range(basicAttributes.accelerationRNG.x, basicAttributes.accelerationRNG.y);
 
@@ -213,57 +226,55 @@ public partial class Animal : MonoBehaviour, IReproducible
 		FillList(diet, dietList);
 		FillList(dangers, dangerList);
 
-		StartCoroutine(UpdateLifeTimeCoroutine());
 		firstPos = transform.position;
 		navMeshAgent.updateRotation = false;
 		ready += IsReady;
 		//TODO: koddan silip editorden yap.
 		canvas.SetActive(false);
 	}
+	#endregion
 
-	private void Consume()
+	#region further implementation
+	//private void Consume()
+	//{
+	//	//ODO: bunu da bişeylere bağla işte bu kadar sade olmasın xd
+	//	lastPos = transform.position;
+	//	//energy -= Vector3.Distance(lastPos, firstPos) * energyConsumeSpeed * Time.deltaTime;
+	//	firstPos = lastPos;
+	//	//ODO: eceli geldiyse ölsün.
+	//	//if (CurrentLifeTime > LifeTime)
+	//	//{
+	//	//	Die(CauseOfDeath.OldAge);
+	//	//}
+	//}
+	//private void Die(CauseOfDeath causeOfDeath)
+	//{
+	//	Debug.Log(gameObject.name + " died of " + causeOfDeath);
+	//	//ODO: ölüm olayları ekle,animasyon vs, yan yatıp gözleri x_x(çarpı yap) bikaç saniye sonra yok olsun.
+	//	Destroy(gameObject);
+	//}
+	//protected void Rest()
+	//{
+	//	//ODO: enerji kazancını tokluk ve susamışlığa bağla, "wellness" veya "wellbeingness" fieldı koy.
+	//	EnergySaturation += Time.deltaTime * Time.deltaTime;
+	//}
+	#endregion
+
+	public void DeterminePriority()
 	{
-		//TODO: bunu da bişeylere bağla işte bu kadar sade olmasın xd
-		lastPos = transform.position;
-		//energy -= Vector3.Distance(lastPos, firstPos) * energyConsumeSpeed * Time.deltaTime;
-		firstPos = lastPos;
-		//TODO: eceli geldiyse ölsün.
-		//if (CurrentLifeTime > LifeTime)
-		//{
-		//	Die(CauseOfDeath.OldAge);
-		//}
-	}
-	private void Die(CauseOfDeath causeOfDeath)
-	{
-		Debug.Log(gameObject.name + " died of " + causeOfDeath);
-		//TODO: ölüm olayları ekle,animasyon vs, yan yatıp gözleri x_x(çarpı yap) bikaç saniye sonra yok olsun.
-		Destroy(gameObject);
-	}
-	protected void Rest()
-	{
-		//TODO: enerji kazancını tokluk ve susamışlığa bağla, "wellness" veya "wellbeingness" fieldı koy.
-		EnergySaturation += Time.deltaTime * Time.deltaTime;
-	}
-	private void DeterminePriority()
-	{
-		//TODO: burası da cumbersome, belki düzenleyebilirsin.
-		foreach (string danger in dangerList)
+		if(InDanger())
 		{
-			if (objectsDictionary.ContainsKey(danger))
-			{
-				currentPriority = Priority.Danger;
-				return;
-			}
-		}
-		if(currentState == State.Eating)
-		{
+			currentPriority = Priority.Danger;
 			return;
 		}
+
 		float maxPriority = Mathf.Min(FoodSaturation, WaterSaturation, HUNDRED - ReproductiveUrge);
+
 		if(maxPriority > restLimit)
 		{
 			currentPriority = Priority.Rest;
 		}
+
 		else if(maxPriority < criticalLimit)
 		{
 			if (maxPriority == FoodSaturation)
@@ -283,7 +294,36 @@ public partial class Animal : MonoBehaviour, IReproducible
 		{
 			currentPriority = Priority.Explore;
 		}
+
+		DetermineState();
 	}
+
+
+	protected virtual void DetermineState()
+	{
+		if (currentState == State.Eating)
+		{
+			if(FoodSaturation >= changePriorityLimit)
+			{
+				currentState = State.EatingDone;
+			}
+			return;
+		}
+		else if (currentState == State.ExploringStarted)
+		{
+			navMeshAgent.speed = TrotSpeed;
+			currentState = State.Exploring;
+		}
+		else if(currentState == State.GoingToFood)
+		{
+			navMeshAgent.speed = RunSpeed;
+		}
+		else if(currentState == State.EatingDone)
+		{
+			//StopCoroutine(eatFoodProcess);
+		}
+	}
+
 	public virtual void ChooseAction()
 	{
 		//TODO: burası karışıyor vaziyet al!! bunu daha düzenli yapabilirsin bence?
@@ -304,7 +344,7 @@ public partial class Animal : MonoBehaviour, IReproducible
 		{
 			//Escape1();
 		}
-		else if(currentState == State.Eating)
+		else if (currentState == State.Eating)
 		{
 			return;
 		}
@@ -317,7 +357,7 @@ public partial class Animal : MonoBehaviour, IReproducible
 		}
 		else if (currentPriority == Priority.Rest)
 		{
-			Rest();
+			//Rest();
 			return;
 		}
 		else if (currentPriority == Priority.Mate)
@@ -337,14 +377,6 @@ public partial class Animal : MonoBehaviour, IReproducible
 		}
 	}
 
-	public virtual void PriorityExplore()
-	{
-		Explore();
-	}
-
-	#region Escape Stuff
-	
-	#endregion
 
 	#region Mating Stuff
 	public virtual GameObject FindPotentialMate()
@@ -422,7 +454,7 @@ public partial class Animal : MonoBehaviour, IReproducible
 		[SerializeField] public Image energyBar;
 
 		[Header("Info Stats")]
-		[SerializeField] public TextMeshProUGUI moveSpeedText;
+		[SerializeField] public TextMeshProUGUI runSpeed;
 		[SerializeField] public TextMeshProUGUI angularSpeedText;
 		[SerializeField] public TextMeshProUGUI accelerationText;
 		[SerializeField] public TextMeshProUGUI exploreTimerText;
@@ -441,7 +473,9 @@ public partial class Animal : MonoBehaviour, IReproducible
 		[SerializeField] [MinMaxSlider(0, MAXWeight)] public Vector2 weightRNG;
 		[SerializeField] public float baseCharisma;
 		[Header("Movement Stuff")]
-		[SerializeField] [MinMaxSlider(1, MAXMoveSpeed)] public Vector2 moveSpeedRNG;
+		[Tooltip("x10 kmph (5 means 50 kmph)")]
+		[SerializeField] [MinMaxSlider(0, MAXRunSpeed)] public Vector2 runSpeedRNG;
+		[SerializeField] [MinMaxSlider(0, MAXTrotSpeed)] public Vector2 trotSpeedRNG;
 		[SerializeField] [MinMaxSlider(1, MAXAngularSpeed)] public Vector2 angularSpeedRNG;
 		[SerializeField] [MinMaxSlider(1, MAXAcceleration)] public Vector2 accelerationRNG;
 		[Header("Randomly Explore Stuff")]

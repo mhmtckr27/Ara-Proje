@@ -2308,7 +2308,7 @@ MonoBehaviour:
   viewRadiusBack: 13.64049
   viewAngleBack: 171.05826
   animalScript: {fileID: 3328987644580737609}
-  collider: {fileID: 0}
+  collider: {fileID: 3328987644580737652}
   viewAngleDangerRNG: {x: 0, y: 90}
   viewRadiusFrontRNG: {x: 3, y: 20}
   viewAngleFrontRNG: {x: 90, y: 270}
@@ -2580,18 +2580,23 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   item: {fileID: 11400000, guid: 6e91e8464069fa1428b37b3901973212, type: 2}
+  animal: {fileID: 3328987644580737609}
   energyValue: 0
   nutritionValue: 0
   moistureValue: 0
   fatPercentage: 0.212
   proteinPercentage: 0.092
-  carbohydratePercentage: 0
+  carbPercentage: 0
+  proteinWeight: 0
+  carbWeight: 0
+  fatWeight: 0
   moisturePercentage: 0.685
-  weightInKg: 1
+  weightInKg: 0
   reproductiveUrgeIncrementValue: 5
   ediblePercentage: 0.85
   edibleWeight: 0
-  carcassDestroyWaitThreshold: 0.02
+  carcassDestroyWaitThreshold: 0.25
+  nutritionPercentage: 0
 --- !u!114 &3328987644580737609
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2607,18 +2612,21 @@ MonoBehaviour:
   _foodSaturation: 0
   _waterSaturation: 0
   _energySaturation: 0
+  currentFoodIntake: 0
+  currentWaterIntake: 0
   diet: 1
-  dangers: 2
+  dangers: 0
   basicAttributes:
     foodSaturationRNG: {x: 0, y: 40}
     waterSaturationRNG: {x: 0, y: 40}
     reproductiveUrgeRNG: {x: 100, y: 100}
     energyRNG: {x: 1, y: 40}
-    lifeTimeRNG: {x: 60, y: 120}
+    lifeTimeYearsRNG: {x: 0.5, y: 0.5}
     energyConsumeSpeedRNG: {x: 1, y: 20}
-    weightRNG: {x: 0, y: 0}
+    weightRNG: {x: 5, y: 5}
     baseCharisma: 0
-    moveSpeedRNG: {x: 1, y: 1}
+    runSpeedRNG: {x: 0, y: 0}
+    trotSpeedRNG: {x: 0, y: 0}
     angularSpeedRNG: {x: 1, y: 360}
     accelerationRNG: {x: 1, y: 20}
     exploreTimerRNG: {x: 4, y: 4}
@@ -2631,7 +2639,7 @@ MonoBehaviour:
     reproductiveUrgeBar: {fileID: 1416171544}
     remainingLifeTimeBar: {fileID: 308886605}
     energyBar: {fileID: 370341062}
-    moveSpeedText: {fileID: 6964953549474078102}
+    runSpeed: {fileID: 6964953549474078102}
     angularSpeedText: {fileID: 3866551048516338939}
     accelerationText: {fileID: 5895135985571943866}
     exploreTimerText: {fileID: 5089506860665505901}
@@ -2641,7 +2649,7 @@ MonoBehaviour:
   child: {fileID: 5724165758098602825}
   targetNearThreshold: 0.1
   fieldOfView: {fileID: 892115452}
-  asFood: {fileID: 0}
+  asFood: {fileID: 7452326776547887567}
   bitePeriod: 0
   biteWeight: 0
   foodIntakeNeedPercentage: 0
@@ -2743,7 +2751,7 @@ GameObject:
   - component: {fileID: 5003132939356773623}
   - component: {fileID: 6964953549474078102}
   m_Layer: 10
-  m_Name: MoveSpeedText
+  m_Name: RunSpeedText
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

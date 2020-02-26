@@ -7,6 +7,10 @@ using UnityEngine.AI;
 
 public partial class Animal
 {
+	public virtual void PriorityExplore()
+	{
+		Explore();
+	}
 	private Vector3 RandomNavSphere(Vector3 origin, float dist, LayerMask layerMask)
 	{
 		Vector3 randDirection = UnityEngine.Random.insideUnitSphere * dist;
